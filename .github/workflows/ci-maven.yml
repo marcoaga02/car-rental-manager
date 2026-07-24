@@ -18,7 +18,7 @@ jobs:
             additional-maven-args: '-Pcoveralls'
           - java: 21
             additional-maven-args: >
-              sonar:sonar -Dsonar.organization=marcoaga02
+              org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=marcoaga02
               -Dsonar.projectKey=marcoaga02_car-rental-manager
               -Dsonar.host.url=https://sonarcloud.io
 
