@@ -24,7 +24,7 @@
     <surefire.report.version>3.5.6</surefire.report.version>
     <jakarta.persistence.api.version>3.1.0</jakarta.persistence.api.version>
 
-    <sonar.coverage.exclusions>**/model/**,**/viewmodel/**</sonar.coverage.exclusions>
+    <sonar.coverage.exclusions>**/model/*.*,**/viewmodel/*.*</sonar.coverage.exclusions>
     <sonar.cpd.exclusions>**/model/**,**/viewmodel/**</sonar.cpd.exclusions>
 
     <sonar.tests>
@@ -72,8 +72,8 @@
           <version>${jacoco.version}</version>
           <configuration>
             <excludes>
-              <exclude>**/model**</exclude>
-              <exclude>**/viewmodel**</exclude>
+              <exclude>**/model/*.*</exclude>
+              <exclude>**/viewmodel/*.*</exclude>
             </excludes>
           </configuration>
           <executions>
