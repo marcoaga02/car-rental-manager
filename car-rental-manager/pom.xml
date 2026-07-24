@@ -14,7 +14,7 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
-    
+
     <junit.version>4.13.2</junit.version>
     <assertj.version>3.27.7</assertj.version>
     <jacoco.version>0.8.15</jacoco.version>
@@ -23,6 +23,17 @@
     <mockito.version>5.23.0</mockito.version>
     <surefire.report.version>3.5.6</surefire.report.version>
     <jakarta.persistence.api.version>3.1.0</jakarta.persistence.api.version>
+
+    <sonar.coverage.exclusions>**/model/**,**/viewmodel/**</sonar.coverage.exclusions>
+    <sonar.cpd.exclusions>**/model/**,**/viewmodel/**</sonar.cpd.exclusions>
+
+    <sonar.tests>
+      ${project.basedir}/src/test/java,
+    </sonar.tests>
+
+    <sonar.junit.reportPaths>
+      ${project.build.directory}/surefire-reports
+    </sonar.junit.reportPaths>
   </properties>
 
   <dependencies>
@@ -61,7 +72,8 @@
           <version>${jacoco.version}</version>
           <configuration>
             <excludes>
-              <!-- TODO aggiungere classi da escludere-->
+              <exclude>**/model**</exclude>
+              <exclude>**/viewmodel**</exclude>
             </excludes>
           </configuration>
           <executions>
@@ -99,10 +111,10 @@
           <version>${pitest.version}</version>
           <configuration>
             <targetClasses>
-              <!-- TODO aggiungere classi su cui fare mutation testing-->
+              <param>com.marcoaga02.carrentalmanager.mapper.*</param>
             </targetClasses>
             <targetTests>
-              <!-- TODO aggiungere classi di test per i mutation testing-->
+              <param>com.marcoaga02.carrentalmanager.mapper.*</param>
             </targetTests>
             <mutators>
               <mutator>DEFAULTS</mutator>
@@ -118,11 +130,10 @@
             <repoToken>${env.COVERALLS_REPO_TOKEN}</repoToken>
           </configuration>
         </plugin>
-        <!--TODO capire dove viene usato-->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-report-plugin</artifactId>
-          <version>${surefire-report.version}</version>
+          <version>${surefire.report.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -144,8 +155,7 @@
       <id>jacoco</id>
       <activation>
         <property>
-          <name>skipCoverage</name>
-          <value>!true</value>
+          <name>!skipCoverage</name>
         </property>
       </activation>
       <build>
