@@ -16,7 +16,7 @@ jobs:
         include:
           - java: 11
             additional-maven-args: '-Pcoveralls'
-          - java: 17
+          - java: 21
             additional-maven-args: >
               sonar:sonar -Dsonar.organization=marcoaga02
               -Dsonar.projectKey=marcoaga02_car-rental-manager
