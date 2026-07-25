@@ -3,6 +3,7 @@ package com.marcoaga02.carrentalmanager.model;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,19 +13,23 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "cars")
 public class Car {
-	
+
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false, unique = true)
 	private String carPlate;
-	
+
+	@Column(nullable = false)
 	private String brand;
-	
+
+	@Column(nullable = false)
 	private String model;
-	
+
+	@Column(nullable = false)
 	private BigDecimal dailyRate;
-	
+
 	public Car(String carPlate, String brand, String model, BigDecimal dailyRate) {
 		this.carPlate = carPlate;
 		this.brand = brand;
@@ -32,7 +37,15 @@ public class Car {
 		this.dailyRate = dailyRate;
 	}
 
+	// Protected constructor required by JPA
+	protected Car() {
+	}
+
 	// Getters
+	public Long getId() {
+		return id;
+	}
+
 	public String getCarPlate() {
 		return carPlate;
 	}
