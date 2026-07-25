@@ -1,22 +1,14 @@
 package com.marcoaga02.carrentalmanager.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "cars")
-public class Car {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+public class Car extends BaseEntity {
 
 	@Column(nullable = false, unique = true)
 	private String carPlate;
@@ -31,6 +23,7 @@ public class Car {
 	private BigDecimal dailyRate;
 
 	public Car(String carPlate, String brand, String model, BigDecimal dailyRate) {
+		super();
 		this.carPlate = carPlate;
 		this.brand = brand;
 		this.model = model;
@@ -39,11 +32,6 @@ public class Car {
 
 	// Protected constructor required by JPA
 	protected Car() {
-	}
-
-	// Getters
-	public Long getId() {
-		return id;
 	}
 
 	public String getCarPlate() {
@@ -64,27 +52,17 @@ public class Car {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(brand, carPlate, dailyRate, id, model);
+		return super.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Car other = (Car) obj;
-		return Objects.equals(brand, other.brand) && Objects.equals(carPlate, other.carPlate)
-				&& Objects.equals(dailyRate, other.dailyRate) && Objects.equals(id, other.id)
-				&& Objects.equals(model, other.model);
+		return super.equals(obj);
 	}
 
 	@Override
 	public String toString() {
-		return "Car [id=" + id + ", carPlate=" + carPlate + ", brand=" + brand + ", model=" + model + ", dailyRate="
-				+ dailyRate + "]";
+		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model + ", dailyRate=" + dailyRate + "]";
 	}
 
 }
