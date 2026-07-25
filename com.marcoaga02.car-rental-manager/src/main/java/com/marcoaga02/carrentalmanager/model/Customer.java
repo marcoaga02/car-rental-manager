@@ -1,21 +1,12 @@
 package com.marcoaga02.carrentalmanager.model;
 
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "customers")
-public class Customer {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+public class Customer extends BaseEntity {
 
 	@Column(nullable = false, unique = true)
 	private String taxIdCode;
@@ -30,6 +21,7 @@ public class Customer {
 	private Boolean deleted = false;
 
 	public Customer(String taxIdCode, String firstname, String lastname) {
+		super();
 		this.taxIdCode = taxIdCode;
 		this.firstname = firstname;
 		this.lastname = lastname;
@@ -40,10 +32,6 @@ public class Customer {
 	}
 
 	// Getters
-	public Long getId() {
-		return id;
-	}
-
 	public String getTaxIdCode() {
 		return taxIdCode;
 	}
@@ -67,27 +55,18 @@ public class Customer {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(deleted, firstname, id, lastname, taxIdCode);
+		return super.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Customer other = (Customer) obj;
-		return Objects.equals(deleted, other.deleted) && Objects.equals(firstname, other.firstname)
-				&& Objects.equals(id, other.id) && Objects.equals(lastname, other.lastname)
-				&& Objects.equals(taxIdCode, other.taxIdCode);
+		return super.equals(obj);
 	}
 
 	@Override
 	public String toString() {
-		return "Customer [id=" + id + ", taxIdCode=" + taxIdCode + ", firstname=" + firstname + ", lastname=" + lastname
-				+ ", deleted=" + deleted + "]";
+		return "Customer [taxIdCode=" + taxIdCode + ", firstname=" + firstname + ", lastname=" + lastname + ", deleted="
+				+ deleted + "]";
 	}
 
 }
