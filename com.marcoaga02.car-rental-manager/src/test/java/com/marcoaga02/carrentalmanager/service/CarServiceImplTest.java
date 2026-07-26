@@ -244,6 +244,7 @@ class CarServiceImplTest {
 			assertThat(result).isEqualTo(carViewModel);
 
 			InOrder inOrder = inOrder(carRepository, carMapper);
+			inOrder.verify(carRepository).findActiveByCarPlate(A_CAR_PLATE);
 			inOrder.verify(carMapper).toEntity(inputViewModel);
 			inOrder.verify(carRepository).save(car);
 			inOrder.verify(carMapper).toViewModel(car);

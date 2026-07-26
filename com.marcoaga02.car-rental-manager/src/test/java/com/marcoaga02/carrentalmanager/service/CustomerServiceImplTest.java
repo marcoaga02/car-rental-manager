@@ -1,6 +1,7 @@
 package com.marcoaga02.carrentalmanager.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
@@ -12,17 +13,22 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.marcoaga02.carrentalmanager.exception.DuplicateTaxIdCodeException;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
 import com.marcoaga02.carrentalmanager.model.Customer;
 import com.marcoaga02.carrentalmanager.repository.CustomerRepository;
@@ -130,12 +136,114 @@ class CustomerServiceImplTest {
 					.sorted(Comparator.comparing(CustomerViewModel::getId))
 					.collect(Collectors.toList());
 
-			assertThat(result).hasSize(2).containsExactlyInAnyOrder(customerViewModel, anotherCustomerViewModel);
+			assertThat(result)
+					.hasSize(2)
+					.containsExactlyInAnyOrder(customerViewModel, anotherCustomerViewModel);
 
 			verify(customerRepository).findAllActive();
 			verify(customerMapper).toViewModel(customer);
 			verify(customerMapper).toViewModel(anotherCustomer);
 			verifyNoMoreInteractions(customerRepository, customerMapper);
+		}
+
+	}
+
+	@Nested
+	class CreateCustomer {
+
+		@Nested
+		class InputValidation {
+
+			@Test
+			void testCreateCustomerWhenTheInputIsNullThrowIllegalArgumentException() {
+				assertThatThrownBy(() -> customerService.createCustomer(null))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("customerViewModel must not be null");
+			}
+
+			@ParameterizedTest
+			@NullSource
+			@ValueSource(strings = { "", " ", " \t" })
+			void testCreateCustomerWhenTaxIdCodeIsNullOrBlankThrowIllegalArgumentException(
+					String invalidTaxIdCode) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, invalidTaxIdCode,
+						A_FIRSTNAME, A_LASTNAME);
+
+				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("taxIdCode must not be blank");
+			}
+
+			@ParameterizedTest
+			@NullSource
+			@ValueSource(strings = { "", " ", " \t" })
+			void testCreateCustomerWhenFirstnameIsNullOrBlankThrowIllegalArgumentException(
+					String invalidFirstname) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
+						invalidFirstname, A_LASTNAME);
+
+				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("firstname must not be blank");
+			}
+
+			@ParameterizedTest
+			@NullSource
+			@ValueSource(strings = { "", " ", " \t" })
+			void testCreateCustomerWhenLastnameIsNullOrBlankThrowIllegalArgumentException(
+					String invalidLastname) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
+						A_FIRSTNAME, invalidLastname);
+
+				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
+						.isInstanceOf(IllegalArgumentException.class)
+						.hasMessage("lastname must not be blank");
+			}
+
+		}
+
+		@Test
+		void testCreateCustomerWhenInputIsValidAddTheNewCustomer() {
+			stubTransaction();
+
+			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE,
+					A_FIRSTNAME, A_LASTNAME);
+
+			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE))
+					.thenReturn(Optional.empty());
+			when(customerMapper.toEntity(inputViewModel)).thenReturn(customer);
+			when(customerRepository.save(customer)).thenReturn(customer);
+			when(customerMapper.toViewModel(customer)).thenReturn(customerViewModel);
+
+			CustomerViewModel result = customerService.createCustomer(inputViewModel);
+
+			assertThat(result).isEqualTo(customerViewModel);
+
+			InOrder inOrder = inOrder(customerRepository, customerMapper);
+			inOrder.verify(customerRepository).findActiveByTaxIdCode(A_TAX_ID_CODE);
+			inOrder.verify(customerMapper).toEntity(inputViewModel);
+			inOrder.verify(customerRepository).save(customer);
+			inOrder.verify(customerMapper).toViewModel(customer);
+			inOrder.verifyNoMoreInteractions();
+		}
+
+		@Test
+		void testCreateCustomerWhenExistAnActiveCustomerWithSameTaxIdCodeThrowsDuplicateTaxIdCodeException() {
+			stubTransaction();
+
+			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE,
+					A_FIRSTNAME, A_LASTNAME);
+			
+			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE))
+					.thenReturn(Optional.of(customer));
+
+			assertThatThrownBy(() -> customerService.createCustomer(inputViewModel))
+					.isInstanceOf(DuplicateTaxIdCodeException.class)
+					.hasMessage("A customer with taxIdCode '" + A_TAX_ID_CODE + "' already exists");
+			
+			verify(customerRepository).findActiveByTaxIdCode(A_TAX_ID_CODE);
+			verifyNoMoreInteractions(customerRepository);
+			verifyNoInteractions(customerMapper);
 		}
 
 	}
