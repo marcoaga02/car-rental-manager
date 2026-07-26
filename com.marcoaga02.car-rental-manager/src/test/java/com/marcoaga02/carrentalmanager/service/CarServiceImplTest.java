@@ -234,7 +234,7 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE))
 					.thenReturn(Optional.empty());
 			when(carMapper.toEntity(inputViewModel)).thenReturn(car);
 			when(carRepository.save(car)).thenReturn(car);
@@ -258,14 +258,14 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE))
 					.thenReturn(Optional.of(car));
 
 			assertThatThrownBy(() -> carService.createCar(inputViewModel))
 					.isInstanceOf(DuplicateCarPlateException.class)
 					.hasMessage("A car with carPlate '" + A_CAR_PLATE + "' already exists");
 
-			verify(carRepository).findActiveWithSameCarPlate(A_CAR_PLATE);
+			verify(carRepository).findActiveByCarPlate(A_CAR_PLATE);
 			verifyNoMoreInteractions(carRepository);
 			verifyNoInteractions(carMapper);
 		}

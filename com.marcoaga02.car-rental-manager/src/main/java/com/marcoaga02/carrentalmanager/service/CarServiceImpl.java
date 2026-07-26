@@ -40,7 +40,7 @@ public class CarServiceImpl implements CarService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String carPlate = carViewModel.getCarPlate();
-			ctx.carRepository().findActiveWithSameCarPlate(carPlate).ifPresent(existingCar -> {
+			ctx.carRepository().findActiveByCarPlate(carPlate).ifPresent(existingCar -> {
 				throw new DuplicateCarPlateException(carPlate);
 			});
 
