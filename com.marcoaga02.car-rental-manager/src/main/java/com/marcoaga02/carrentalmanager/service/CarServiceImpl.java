@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
@@ -17,7 +18,8 @@ public class CarServiceImpl implements CarService {
 	private TransactionManager transactionManager;
 	private CarMapper carMapper;
 
-	public CarServiceImpl(TransactionManager transactionManager, CarMapper carMapper) {
+	public CarServiceImpl(TransactionManager transactionManager,
+			CarMapper carMapper) {
 		this.transactionManager = transactionManager;
 		this.carMapper = carMapper;
 	}
@@ -39,9 +41,12 @@ public class CarServiceImpl implements CarService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String carPlate = carViewModel.getCarPlate();
-			ctx.carRepository().findActiveWithSameCarPlate(carPlate).ifPresent(existingCar -> {
-				throw new DuplicateCarPlateException(carPlate);
-			});
+			ctx
+					.carRepository()
+					.findActiveWithSameCarPlate(carPlate)
+					.ifPresent(existingCar -> {
+						throw new DuplicateCarPlateException(carPlate);
+					});
 
 			Car toSave = carMapper.toEntity(carViewModel);
 			return carMapper.toViewModel(ctx.carRepository().save(toSave));
@@ -67,6 +72,23 @@ public class CarServiceImpl implements CarService {
 		if (carViewModel.getDailyRate().compareTo(BigDecimal.ZERO) <= 0) {
 			throw new IllegalArgumentException("dailyRate must be positive");
 		}
+	}
+
+	@Override
+	public void deleteCar(Long carId) {
+		if (carId == null) {
+			throw new IllegalArgumentException("carId must not be null");
+		}
+
+		transactionManager.doInTransaction(ctx -> {
+			Car car = ctx
+					.carRepository()
+					.findActiveById(carId)
+					.orElseThrow(() -> new CarNotFoundException(carId));
+			car.setDeleted(true);
+			ctx.carRepository().save(car);
+			return null;
+		});
 	}
 
 }

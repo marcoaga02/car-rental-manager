@@ -24,11 +24,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
@@ -66,7 +68,8 @@ class CarServiceImplTest {
 	private static final String ANOTHER_MODEL = "anotherModel";
 
 	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
-	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
+	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal
+			.valueOf(4.3);
 
 	private static final Long AN_ID = 10L;
 	private static final Long ANOTHER_ID = 13L;
@@ -77,18 +80,21 @@ class CarServiceImplTest {
 	@BeforeEach
 	void setup() {
 		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL,
+				A_DAILY_RATE);
 
-		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
-		anotherCarViewModel = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
 				ANOTHER_DAILY_RATE);
+		anotherCarViewModel = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE,
+				ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
 	}
 
 	// Required by the strict stubbing of MockitoExtension
 	private void stubTransaction() {
 		when(transactionContext.carRepository()).thenReturn(carRepository);
 		when(transactionManager.doInTransaction(any()))
-				.thenAnswer(answer((TransactionCode<?> code) -> code.apply(transactionContext)));
+				.thenAnswer(answer((TransactionCode<?> code) -> code
+						.apply(transactionContext)));
 	}
 
 	@Nested
@@ -98,7 +104,8 @@ class CarServiceImplTest {
 		void testGetAllCarsWhenThereAreNoCarsReturnAnEmptyList() {
 			stubTransaction();
 
-			when(carRepository.findAllActive()).thenReturn(Collections.emptyList());
+			when(carRepository.findAllActive())
+					.thenReturn(Collections.emptyList());
 
 			List<CarViewModel> result = carService.getAllCars();
 
@@ -130,9 +137,11 @@ class CarServiceImplTest {
 		void testGetAllCarsWhenThereAreMultipleCarsReturnAListWithAllElements() {
 			stubTransaction();
 
-			when(carRepository.findAllActive()).thenReturn(List.of(car, anotherCar));
+			when(carRepository.findAllActive())
+					.thenReturn(List.of(car, anotherCar));
 			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
-			when(carMapper.toViewModel(anotherCar)).thenReturn(anotherCarViewModel);
+			when(carMapper.toViewModel(anotherCar))
+					.thenReturn(anotherCarViewModel);
 
 			List<CarViewModel> result = carService
 					.getAllCars()
@@ -140,7 +149,10 @@ class CarServiceImplTest {
 					.sorted(Comparator.comparing(CarViewModel::getId))
 					.collect(Collectors.toList());
 
-			assertThat(result).hasSize(2).containsExactlyInAnyOrder(carViewModel, anotherCarViewModel);
+			assertThat(result)
+					.hasSize(2)
+					.containsExactlyInAnyOrder(carViewModel,
+							anotherCarViewModel);
 
 			InOrder inOrder = inOrder(carRepository, carMapper);
 			inOrder.verify(carRepository).findAllActive();
@@ -165,8 +177,10 @@ class CarServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCarWhenCarPlateIsNullOrBlankThrowIllegalArgumentException(String invalidPlate) {
-				CarViewModel invalidCar = new CarViewModel(AN_ID, invalidPlate, A_BRAND, A_MODEL, A_DAILY_RATE);
+			void testCreateCarWhenCarPlateIsNullOrBlankThrowIllegalArgumentException(
+					String invalidPlate) {
+				CarViewModel invalidCar = new CarViewModel(AN_ID, invalidPlate,
+						A_BRAND, A_MODEL, A_DAILY_RATE);
 
 				assertThatThrownBy(() -> carService.createCar(invalidCar))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -176,8 +190,10 @@ class CarServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCarWhenBrandIsNullOrBlankThrowIllegalArgumentException(String invalidBrand) {
-				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, invalidBrand, A_MODEL, A_DAILY_RATE);
+			void testCreateCarWhenBrandIsNullOrBlankThrowIllegalArgumentException(
+					String invalidBrand) {
+				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE,
+						invalidBrand, A_MODEL, A_DAILY_RATE);
 
 				assertThatThrownBy(() -> carService.createCar(invalidCar))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -187,8 +203,10 @@ class CarServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCarWhenModelIsNullOrBlankThrowIllegalArgumentException(String invalidModel) {
-				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, invalidModel, A_DAILY_RATE);
+			void testCreateCarWhenModelIsNullOrBlankThrowIllegalArgumentException(
+					String invalidModel) {
+				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE,
+						A_BRAND, invalidModel, A_DAILY_RATE);
 
 				assertThatThrownBy(() -> carService.createCar(invalidCar))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -197,7 +215,8 @@ class CarServiceImplTest {
 
 			@Test
 			void testCreateCarWhenDailyRateIsNullThrowIllegalArgumentException() {
-				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, null);
+				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE,
+						A_BRAND, A_MODEL, null);
 				assertThatThrownBy(() -> carService.createCar(invalidCar))
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("dailyRate must not be null");
@@ -205,9 +224,10 @@ class CarServiceImplTest {
 
 			@ParameterizedTest
 			@ValueSource(doubles = { 0.0, -0.01, -10.2 })
-			void testCreateCarWhenDailyRateIsZeroOrNegativeThrowIllegalArgumentException(double invalidRate) {
-				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL,
-						BigDecimal.valueOf(invalidRate));
+			void testCreateCarWhenDailyRateIsZeroOrNegativeThrowIllegalArgumentException(
+					double invalidRate) {
+				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE,
+						A_BRAND, A_MODEL, BigDecimal.valueOf(invalidRate));
 
 				assertThatThrownBy(() -> carService.createCar(invalidCar))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -218,9 +238,12 @@ class CarServiceImplTest {
 		@Test
 		void testCreateCarWhenInputIsValidAddTheNewCar() {
 			stubTransaction();
-			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE)).thenReturn(Optional.empty());
+			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE,
+					A_BRAND, A_MODEL, A_DAILY_RATE);
+
+			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
+					.thenReturn(Optional.empty());
 			when(carMapper.toEntity(inputViewModel)).thenReturn(car);
 			when(carRepository.save(car)).thenReturn(car);
 			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
@@ -237,17 +260,71 @@ class CarServiceImplTest {
 		}
 
 		@Test
-		void testCreateCarWhenExistAnActiveCarWithSameCarPlateThrows() {
+		void testCreateCarWhenExistAnActiveCarWithSameCarPlateThrowsDuplicateCarPlateException() {
 			stubTransaction();
-			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE)).thenReturn(Optional.of(car));
+			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE,
+					A_BRAND, A_MODEL, A_DAILY_RATE);
+
+			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
+					.thenReturn(Optional.of(car));
 
 			assertThatThrownBy(() -> carService.createCar(inputViewModel))
 					.isInstanceOf(DuplicateCarPlateException.class)
-					.hasMessage("A car with carPlate '" + A_CAR_PLATE + "' already exists");
+					.hasMessage("A car with carPlate '" + A_CAR_PLATE
+							+ "' already exists");
 
 			verify(carRepository).findActiveWithSameCarPlate(A_CAR_PLATE);
+			verifyNoMoreInteractions(carRepository);
+			verifyNoInteractions(carMapper);
+		}
+
+	}
+
+	@Nested
+	class DeleteCar {
+
+		@Test
+		void testDeleteCarWhenInputIsNullThrowIllegalArgumentException() {
+			assertThatThrownBy(() -> carService.deleteCar(null))
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("carId must not be null");
+		}
+
+		@Test
+		void testDeleteCarWhenIdIsValidDeleteTheCar() {
+			stubTransaction();
+
+			when(carRepository.findActiveById(AN_ID))
+					.thenReturn(Optional.of(car));
+			when(carRepository.save(car)).thenReturn(car);
+
+			carService.deleteCar(AN_ID);
+
+			ArgumentCaptor<Car> carCaptor = ArgumentCaptor.forClass(Car.class);
+			verify(carRepository).save(carCaptor.capture());
+
+			Car savedCar = carCaptor.getValue();
+			assertThat(savedCar.getDeleted()).isTrue();
+			assertThat(savedCar).isSameAs(car);
+
+			verify(carRepository).findActiveById(AN_ID);
+			verifyNoMoreInteractions(carRepository);
+			verifyNoInteractions(carMapper);
+		}
+
+		@Test
+		void testDeleteCarWhenThereIsNoActiveCarWithSameIdThrowsCarNotFoundException() {
+			stubTransaction();
+
+			when(carRepository.findActiveById(ANOTHER_ID))
+					.thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> carService.deleteCar(ANOTHER_ID))
+					.isInstanceOf(CarNotFoundException.class)
+					.hasMessage("Car with id '" + ANOTHER_ID + "' not found");
+			
+			verify(carRepository).findActiveById(ANOTHER_ID);
 			verifyNoMoreInteractions(carRepository);
 			verifyNoInteractions(carMapper);
 		}
