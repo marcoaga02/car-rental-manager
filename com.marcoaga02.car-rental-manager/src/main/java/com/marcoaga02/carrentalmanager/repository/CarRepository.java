@@ -9,7 +9,7 @@ public interface CarRepository {
 
 	List<Car> findAllActive();
 
-	Optional<Car> findActiveWithSameCarPlate(String carPlate);
+	Optional<Car> findActiveByCarPlate(String carPlate);
 
 	Optional<Car> findActiveById(Long id);
 

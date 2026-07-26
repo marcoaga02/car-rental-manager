@@ -40,7 +40,7 @@ public class CarServiceImpl implements CarService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String carPlate = carViewModel.getCarPlate();
-			ctx.carRepository().findActiveWithSameCarPlate(carPlate).ifPresent(existingCar -> {
+			ctx.carRepository().findActiveByCarPlate(carPlate).ifPresent(existingCar -> {
 				throw new DuplicateCarPlateException(carPlate);
 			});
 
@@ -81,8 +81,10 @@ public class CarServiceImpl implements CarService {
 					.carRepository()
 					.findActiveById(carId)
 					.orElseThrow(() -> new CarNotFoundException(carId));
+
 			car.setDeleted(true);
 			ctx.carRepository().save(car);
+
 			return null;
 		});
 	}

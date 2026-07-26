@@ -146,11 +146,10 @@ class CarServiceImplTest {
 					.hasSize(2)
 					.containsExactlyInAnyOrder(carViewModel, anotherCarViewModel);
 
-			InOrder inOrder = inOrder(carRepository, carMapper);
-			inOrder.verify(carRepository).findAllActive();
-			inOrder.verify(carMapper).toViewModel(car);
-			inOrder.verify(carMapper).toViewModel(anotherCar);
-			inOrder.verifyNoMoreInteractions();
+			verify(carRepository).findAllActive();
+			verify(carMapper).toViewModel(car);
+			verify(carMapper).toViewModel(anotherCar);
+			verifyNoMoreInteractions(carRepository, carMapper);
 		}
 	}
 
@@ -234,8 +233,7 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
-					.thenReturn(Optional.empty());
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE)).thenReturn(Optional.empty());
 			when(carMapper.toEntity(inputViewModel)).thenReturn(car);
 			when(carRepository.save(car)).thenReturn(car);
 			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
@@ -245,6 +243,7 @@ class CarServiceImplTest {
 			assertThat(result).isEqualTo(carViewModel);
 
 			InOrder inOrder = inOrder(carRepository, carMapper);
+			inOrder.verify(carRepository).findActiveByCarPlate(A_CAR_PLATE);
 			inOrder.verify(carMapper).toEntity(inputViewModel);
 			inOrder.verify(carRepository).save(car);
 			inOrder.verify(carMapper).toViewModel(car);
@@ -258,14 +257,13 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveWithSameCarPlate(A_CAR_PLATE))
-					.thenReturn(Optional.of(car));
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE)).thenReturn(Optional.of(car));
 
 			assertThatThrownBy(() -> carService.createCar(inputViewModel))
 					.isInstanceOf(DuplicateCarPlateException.class)
 					.hasMessage("A car with carPlate '" + A_CAR_PLATE + "' already exists");
 
-			verify(carRepository).findActiveWithSameCarPlate(A_CAR_PLATE);
+			verify(carRepository).findActiveByCarPlate(A_CAR_PLATE);
 			verifyNoMoreInteractions(carRepository);
 			verifyNoInteractions(carMapper);
 		}
