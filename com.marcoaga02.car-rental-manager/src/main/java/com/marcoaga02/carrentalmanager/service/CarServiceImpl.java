@@ -1,8 +1,12 @@
 package com.marcoaga02.carrentalmanager.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.transaction.TransactionManager;
@@ -20,9 +24,49 @@ public class CarServiceImpl implements CarService {
 
 	@Override
 	public List<CarViewModel> getAllCars() {
-		List<Car> cars = transactionManager.doInTransaction(ctx -> ctx.carRepository().findAllActive());
+		return transactionManager
+				.doInTransaction(ctx -> ctx
+						.carRepository()
+						.findAllActive()
+						.stream()
+						.map(carMapper::toViewModel)
+						.collect(Collectors.toList()));
+	}
 
-		return cars.stream().map(carMapper::toViewModel).collect(Collectors.toList());
+	@Override
+	public CarViewModel createCar(CarViewModel carViewModel) {
+		validateCreationInput(carViewModel);
+
+		return transactionManager.doInTransaction(ctx -> {
+			final String carPlate = carViewModel.getCarPlate();
+			ctx.carRepository().findActiveWithSameCarPlate(carPlate).ifPresent(existingCar -> {
+				throw new DuplicateCarPlateException(carPlate);
+			});
+
+			Car toSave = carMapper.toEntity(carViewModel);
+			return carMapper.toViewModel(ctx.carRepository().save(toSave));
+		});
+	}
+
+	private void validateCreationInput(CarViewModel carViewModel) {
+		if (carViewModel == null) {
+			throw new IllegalArgumentException("carViewModel must not be null");
+		}
+		if (StringUtils.isBlank(carViewModel.getCarPlate())) {
+			throw new IllegalArgumentException("carPlate must not be blank");
+		}
+		if (StringUtils.isBlank(carViewModel.getBrand())) {
+			throw new IllegalArgumentException("brand must not be blank");
+		}
+		if (StringUtils.isBlank(carViewModel.getModel())) {
+			throw new IllegalArgumentException("model must not be blank");
+		}
+		if (carViewModel.getDailyRate() == null) {
+			throw new IllegalArgumentException("dailyRate must not be null");
+		}
+		if (carViewModel.getDailyRate().compareTo(BigDecimal.ZERO) <= 0) {
+			throw new IllegalArgumentException("dailyRate must be positive");
+		}
 	}
 
 }

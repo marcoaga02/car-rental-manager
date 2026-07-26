@@ -6,15 +6,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.model.Customer;
 import com.marcoaga02.carrentalmanager.model.Rental;
 import com.marcoaga02.carrentalmanager.viewmodel.RentalViewModel;
 
-public class RentalMapperTest {
+class RentalMapperTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -35,18 +35,18 @@ public class RentalMapperTest {
 
 	private RentalMapper rentalMapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		rentalMapper = new RentalMapper();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsNullReturnNull() {
+	void testToViewModelWhenInputIsNullReturnNull() {
 		assertThat(rentalMapper.toViewModel(null)).isNull();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
+	void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
 		Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		Rental rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);

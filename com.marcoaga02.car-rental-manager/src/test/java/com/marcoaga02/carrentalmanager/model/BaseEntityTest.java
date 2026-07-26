@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class BaseEntityTest {
+class BaseEntityTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -18,38 +18,38 @@ public class BaseEntityTest {
 
 	private Car entity;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		entity = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 	}
 
 	@Test
-	public void testGetUuidIsNotNullByDefault() {
+	void testGetUuidIsNotNullByDefault() {
 		assertThat(entity.getUuid()).isNotNull();
 	}
 
 	@Test
-	public void testGetIdIsNullWhenNotPersisted() {
+	void testGetIdIsNullWhenNotPersisted() {
 		assertThat(entity.getId()).isNull();
 	}
 
 	@Test
-	public void testEqualsWhenSameReferenceReturnTrue() {
+	void testEqualsWhenSameReferenceReturnTrue() {
 		assertThat(entity.equals(entity)).isTrue();
 	}
 
 	@Test
-	public void testEqualsWhenObjectIsNullReturnFalse() {
+	void testEqualsWhenObjectIsNullReturnFalse() {
 		assertThat(entity.equals(null)).isFalse();
 	}
 
 	@Test
-	public void testEqualsWhenObjectIsNotABaseEntityReturnFalse() {
+	void testEqualsWhenObjectIsNotABaseEntityReturnFalse() {
 		assertThat(entity.equals(A_STRING)).isFalse();
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTrue() {
+	void testEqualsWhenUuidIsTheSameReturnTrue() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		other.setUuid(entity.getUuid());
 
@@ -57,14 +57,14 @@ public class BaseEntityTest {
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsDifferentReturnFalse() {
+	void testEqualsWhenUuidIsDifferentReturnFalse() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
 		assertThat(entity.equals(other)).isFalse();
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
+	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		other.setUuid(entity.getUuid());
 
