@@ -34,7 +34,8 @@ class RentalTest {
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 		other.setUuid(rental.getUuid());
 
 		assertThat(rental.equals(other)).isTrue();
@@ -42,14 +43,16 @@ class RentalTest {
 
 	@Test
 	void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 
 		assertThat(rental.equals(other)).isFalse();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 		other.setUuid(rental.getUuid());
 
 		assertThat(other).hasSameHashCodeAs(rental);

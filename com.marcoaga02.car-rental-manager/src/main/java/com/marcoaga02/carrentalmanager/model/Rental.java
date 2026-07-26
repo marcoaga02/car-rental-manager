@@ -67,7 +67,8 @@ public class Rental extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Rental [car=" + car + ", customer=" + customer + ", startDate=" + startDate + ", days=" + days + "]";
+		return "Rental [car=" + car + ", customer=" + customer + ", startDate=" + startDate
+				+ ", days=" + days + "]";
 	}
 
 }

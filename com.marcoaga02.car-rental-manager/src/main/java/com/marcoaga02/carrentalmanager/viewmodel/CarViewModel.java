@@ -15,7 +15,8 @@ public class CarViewModel {
 
 	private BigDecimal dailyRate;
 
-	public CarViewModel(Long id, String carPlate, String brand, String model, BigDecimal dailyRate) {
+	public CarViewModel(Long id, String carPlate, String brand, String model,
+			BigDecimal dailyRate) {
 		this.id = id;
 		this.carPlate = carPlate;
 		this.brand = brand;
@@ -65,8 +66,8 @@ public class CarViewModel {
 
 	@Override
 	public String toString() {
-		return "CarViewModel [id=" + id + ", carPlate=" + carPlate + ", brand=" + brand + ", model=" + model
-				+ ", dailyRate=" + dailyRate + "]";
+		return "CarViewModel [id=" + id + ", carPlate=" + carPlate + ", brand=" + brand + ", model="
+				+ model + ", dailyRate=" + dailyRate + "]";
 	}
 
 }

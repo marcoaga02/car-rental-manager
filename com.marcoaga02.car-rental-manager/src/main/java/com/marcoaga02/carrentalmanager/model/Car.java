@@ -52,7 +52,7 @@ public class Car extends BaseEntity {
 	public BigDecimal getDailyRate() {
 		return dailyRate;
 	}
-	
+
 	public Boolean getDeleted() {
 		return deleted;
 	}
@@ -74,7 +74,8 @@ public class Car extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model + ", dailyRate=" + dailyRate + "]";
+		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model
+				+ ", dailyRate=" + dailyRate + ", deleted=" + deleted + "]";
 	}
 
 }

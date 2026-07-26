@@ -18,8 +18,7 @@ public class CarServiceImpl implements CarService {
 	private TransactionManager transactionManager;
 	private CarMapper carMapper;
 
-	public CarServiceImpl(TransactionManager transactionManager,
-			CarMapper carMapper) {
+	public CarServiceImpl(TransactionManager transactionManager, CarMapper carMapper) {
 		this.transactionManager = transactionManager;
 		this.carMapper = carMapper;
 	}
@@ -41,12 +40,9 @@ public class CarServiceImpl implements CarService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String carPlate = carViewModel.getCarPlate();
-			ctx
-					.carRepository()
-					.findActiveWithSameCarPlate(carPlate)
-					.ifPresent(existingCar -> {
-						throw new DuplicateCarPlateException(carPlate);
-					});
+			ctx.carRepository().findActiveWithSameCarPlate(carPlate).ifPresent(existingCar -> {
+				throw new DuplicateCarPlateException(carPlate);
+			});
 
 			Car toSave = carMapper.toEntity(carViewModel);
 			return carMapper.toViewModel(ctx.carRepository().save(toSave));
