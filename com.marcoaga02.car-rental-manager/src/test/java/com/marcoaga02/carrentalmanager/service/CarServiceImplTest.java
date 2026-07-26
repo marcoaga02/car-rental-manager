@@ -146,11 +146,10 @@ class CarServiceImplTest {
 					.hasSize(2)
 					.containsExactlyInAnyOrder(carViewModel, anotherCarViewModel);
 
-			InOrder inOrder = inOrder(carRepository, carMapper);
-			inOrder.verify(carRepository).findAllActive();
-			inOrder.verify(carMapper).toViewModel(car);
-			inOrder.verify(carMapper).toViewModel(anotherCar);
-			inOrder.verifyNoMoreInteractions();
+			verify(carRepository).findAllActive();
+		    verify(carMapper).toViewModel(car);
+		    verify(carMapper).toViewModel(anotherCar);
+		    verifyNoMoreInteractions(carRepository, carMapper);
 		}
 	}
 
