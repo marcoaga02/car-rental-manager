@@ -81,8 +81,10 @@ public class CarServiceImpl implements CarService {
 					.carRepository()
 					.findActiveById(carId)
 					.orElseThrow(() -> new CarNotFoundException(carId));
+
 			car.setDeleted(true);
 			ctx.carRepository().save(car);
+
 			return null;
 		});
 	}

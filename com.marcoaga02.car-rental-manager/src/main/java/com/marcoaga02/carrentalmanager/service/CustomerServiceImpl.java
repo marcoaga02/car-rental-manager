@@ -76,10 +76,10 @@ public class CustomerServiceImpl implements CustomerService {
 					.customerRepository()
 					.findActiveById(customerId)
 					.orElseThrow(() -> new CustomerNotFoundException(customerId));
-			
+
 			customer.setDeleted(true);
 			ctx.customerRepository().save(customer);
-			
+
 			return null;
 		});
 	}

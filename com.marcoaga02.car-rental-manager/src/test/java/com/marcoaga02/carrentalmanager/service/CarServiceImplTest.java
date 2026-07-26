@@ -147,9 +147,9 @@ class CarServiceImplTest {
 					.containsExactlyInAnyOrder(carViewModel, anotherCarViewModel);
 
 			verify(carRepository).findAllActive();
-		    verify(carMapper).toViewModel(car);
-		    verify(carMapper).toViewModel(anotherCar);
-		    verifyNoMoreInteractions(carRepository, carMapper);
+			verify(carMapper).toViewModel(car);
+			verify(carMapper).toViewModel(anotherCar);
+			verifyNoMoreInteractions(carRepository, carMapper);
 		}
 	}
 
@@ -233,8 +233,7 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveByCarPlate(A_CAR_PLATE))
-					.thenReturn(Optional.empty());
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE)).thenReturn(Optional.empty());
 			when(carMapper.toEntity(inputViewModel)).thenReturn(car);
 			when(carRepository.save(car)).thenReturn(car);
 			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
@@ -258,8 +257,7 @@ class CarServiceImplTest {
 			CarViewModel inputViewModel = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL,
 					A_DAILY_RATE);
 
-			when(carRepository.findActiveByCarPlate(A_CAR_PLATE))
-					.thenReturn(Optional.of(car));
+			when(carRepository.findActiveByCarPlate(A_CAR_PLATE)).thenReturn(Optional.of(car));
 
 			assertThatThrownBy(() -> carService.createCar(inputViewModel))
 					.isInstanceOf(DuplicateCarPlateException.class)

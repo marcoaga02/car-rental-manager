@@ -290,7 +290,7 @@ class CustomerServiceImplTest {
 			assertThatThrownBy(() -> customerService.deleteCustomer(ANOTHER_ID))
 					.isInstanceOf(CustomerNotFoundException.class)
 					.hasMessage("Customer with id '" + ANOTHER_ID + "' not found");
-			
+
 			verify(customerRepository).findActiveById(ANOTHER_ID);
 			verifyNoMoreInteractions(customerRepository);
 			verifyNoInteractions(customerMapper);
