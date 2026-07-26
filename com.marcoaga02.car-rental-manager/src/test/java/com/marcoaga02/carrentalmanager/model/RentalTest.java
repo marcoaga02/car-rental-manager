@@ -6,10 +6,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class RentalTest {
+class RentalTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -25,31 +25,34 @@ public class RentalTest {
 
 	private Rental rental;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+	void testEqualsWhenUuidIsTheSameReturnTrue() {
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 		other.setUuid(rental.getUuid());
 
 		assertThat(rental.equals(other)).isTrue();
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+	void testEqualsWhenUuidIsDifferentReturnFalse() {
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 
 		assertThat(rental.equals(other)).isFalse();
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
+	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
+		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE,
+				A_NUMBER_OF_DAYS);
 		other.setUuid(rental.getUuid());
 
 		assertThat(other).hasSameHashCodeAs(rental);

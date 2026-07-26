@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
-public class CarMapperTest {
+class CarMapperTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -20,18 +20,18 @@ public class CarMapperTest {
 
 	private CarMapper carMapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		carMapper = new CarMapper();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsNullReturnNull() {
+	void testToViewModelWhenInputIsNullReturnNull() {
 		assertThat(carMapper.toViewModel(null)).isNull();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
+	void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
 		Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
 		CarViewModel result = carMapper.toViewModel(car);
@@ -44,13 +44,14 @@ public class CarMapperTest {
 	}
 
 	@Test
-	public void testToEntityWhenInputIsNullReturnNull() {
+	void testToEntityWhenInputIsNullReturnNull() {
 		assertThat(carMapper.toEntity(null)).isNull();
 	}
 
 	@Test
-	public void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
-		CarViewModel carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+	void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
+		CarViewModel carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL,
+				A_DAILY_RATE);
 
 		Car result = carMapper.toEntity(carViewModel);
 

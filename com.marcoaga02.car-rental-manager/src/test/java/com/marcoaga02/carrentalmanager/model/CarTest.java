@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class CarTest {
+class CarTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -16,13 +16,13 @@ public class CarTest {
 
 	private Car car;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTrue() {
+	void testEqualsWhenUuidIsTheSameReturnTrue() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		other.setUuid(car.getUuid());
 
@@ -30,14 +30,14 @@ public class CarTest {
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsDifferentReturnFalse() {
+	void testEqualsWhenUuidIsDifferentReturnFalse() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
 		assertThat(car.equals(other)).isFalse();
 	}
 
 	@Test
-	public void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
+	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
 		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		other.setUuid(car.getUuid());
 

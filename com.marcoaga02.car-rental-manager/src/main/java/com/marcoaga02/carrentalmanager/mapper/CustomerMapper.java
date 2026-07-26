@@ -10,8 +10,8 @@ public class CustomerMapper {
 			return null;
 		}
 
-		return new CustomerViewModel(customer.getId(), customer.getTaxIdCode(), customer.getFirstname(),
-				customer.getLastname());
+		return new CustomerViewModel(customer.getId(), customer.getTaxIdCode(),
+				customer.getFirstname(), customer.getLastname());
 	}
 
 	public Customer toEntity(CustomerViewModel customerViewModel) {
@@ -19,7 +19,8 @@ public class CustomerMapper {
 			return null;
 		}
 
-		return new Customer(customerViewModel.getTaxIdCode(), customerViewModel.getFirstname(),
+		return new Customer(customerViewModel.getTaxIdCode(),
+				customerViewModel.getFirstname(),
 				customerViewModel.getLastname());
 	}
 

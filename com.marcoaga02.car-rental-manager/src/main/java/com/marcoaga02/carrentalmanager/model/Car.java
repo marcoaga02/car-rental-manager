@@ -22,6 +22,9 @@ public class Car extends BaseEntity {
 	@Column(nullable = false)
 	private BigDecimal dailyRate;
 
+	@Column(nullable = false)
+	private Boolean deleted = false;
+
 	public Car(String carPlate, String brand, String model, BigDecimal dailyRate) {
 		super();
 		this.carPlate = carPlate;
@@ -50,6 +53,15 @@ public class Car extends BaseEntity {
 		return dailyRate;
 	}
 
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	// Setters
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
+
 	@Override
 	public int hashCode() {
 		return super.hashCode();
@@ -62,7 +74,8 @@ public class Car extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model + ", dailyRate=" + dailyRate + "]";
+		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model
+				+ ", dailyRate=" + dailyRate + ", deleted=" + deleted + "]";
 	}
 
 }

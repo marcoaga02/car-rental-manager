@@ -15,16 +15,20 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
 
-    <junit.version>4.13.2</junit.version>
+    <junit.jupiter.version>5.14.4</junit.jupiter.version>
     <assertj.version>3.27.7</assertj.version>
     <jacoco.version>0.8.15</jacoco.version>
     <pitest.version>1.25.7</pitest.version>
     <coveralls.version>5.1.0</coveralls.version>
     <mockito.version>5.23.0</mockito.version>
-    <surefire.report.version>3.5.6</surefire.report.version>
+    <maven.surefire.version>3.5.6</maven.surefire.version>
     <jakarta.persistence.api.version>3.1.0</jakarta.persistence.api.version>
 
-    <sonar.coverage.exclusions>**/model/Car.java,**/model/Customer.java,**/model/Rental.java,**/viewmodel/*.*</sonar.coverage.exclusions>
+    <commons.lang3.version>3.20.0</commons.lang3.version>
+    <pitest.junit5.plugin.version>1.2.3</pitest.junit5.plugin.version>
+
+    <sonar.coverage.exclusions>
+      **/model/Car.java,**/model/Customer.java,**/model/Rental.java,**/viewmodel/*.*</sonar.coverage.exclusions>
     <sonar.cpd.exclusions>**/model/**,**/viewmodel/**</sonar.cpd.exclusions>
 
     <sonar.tests>
@@ -42,11 +46,16 @@
       <artifactId>jakarta.persistence-api</artifactId>
       <version>${jakarta.persistence.api.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang3.version}</version>
+    </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -58,6 +67,12 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
@@ -111,12 +126,21 @@
           <groupId>org.pitest</groupId>
           <artifactId>pitest-maven</artifactId>
           <version>${pitest.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.pitest</groupId>
+              <artifactId>pitest-junit5-plugin</artifactId>
+              <version>${pitest.junit5.plugin.version}</version>
+            </dependency>
+          </dependencies>
           <configuration>
             <targetClasses>
               <param>com.marcoaga02.carrentalmanager.mapper.*</param>
+              <param>com.marcoaga02.carrentalmanager.service.*</param>
             </targetClasses>
             <targetTests>
               <param>com.marcoaga02.carrentalmanager.mapper.*</param>
+              <param>com.marcoaga02.carrentalmanager.service.*</param>
             </targetTests>
             <mutators>
               <mutator>DEFAULTS</mutator>
@@ -133,9 +157,12 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-report-plugin</artifactId>
-          <version>${surefire.report.version}</version>
+          <version>${maven.surefire.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>

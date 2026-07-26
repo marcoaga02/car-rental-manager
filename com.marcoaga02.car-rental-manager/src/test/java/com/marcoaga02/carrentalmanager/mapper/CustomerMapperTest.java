@@ -2,13 +2,13 @@ package com.marcoaga02.carrentalmanager.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.marcoaga02.carrentalmanager.model.Customer;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
-public class CustomerMapperTest {
+class CustomerMapperTest {
 
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
 	private static final String A_FIRSTNAME = "aFirstname";
@@ -17,18 +17,18 @@ public class CustomerMapperTest {
 
 	private CustomerMapper customerMapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		customerMapper = new CustomerMapper();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsNullReturnNull() {
+	void testToViewModelWhenInputIsNullReturnNull() {
 		assertThat(customerMapper.toViewModel(null)).isNull();
 	}
 
 	@Test
-	public void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
+	void testToViewModelWhenInputIsValidReturnTheCorrectMapping() {
 		Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
 		CustomerViewModel result = customerMapper.toViewModel(customer);
@@ -40,13 +40,14 @@ public class CustomerMapperTest {
 	}
 
 	@Test
-	public void testToEntityWhenInputIsNullReturnNull() {
+	void testToEntityWhenInputIsNullReturnNull() {
 		assertThat(customerMapper.toEntity(null)).isNull();
 	}
 
 	@Test
-	public void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
-		CustomerViewModel customerViewModel = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+	void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
+		CustomerViewModel customerViewModel = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
+				A_FIRSTNAME, A_LASTNAME);
 
 		Customer result = customerMapper.toEntity(customerViewModel);
 
