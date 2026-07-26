@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateTaxIdCodeException;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
 import com.marcoaga02.carrentalmanager.model.Customer;
@@ -37,10 +38,13 @@ public class CustomerServiceImpl implements CustomerService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String taxIdCode = customerViewModel.getTaxIdCode();
-			ctx.customerRepository().findActiveByTaxIdCode(taxIdCode).ifPresent(existingCustomer -> {
-				throw new DuplicateTaxIdCodeException(taxIdCode);
-			});
-			
+			ctx
+					.customerRepository()
+					.findActiveByTaxIdCode(taxIdCode)
+					.ifPresent(existingCustomer -> {
+						throw new DuplicateTaxIdCodeException(taxIdCode);
+					});
+
 			Customer toSave = customerMapper.toEntity(customerViewModel);
 			return customerMapper.toViewModel(ctx.customerRepository().save(toSave));
 		});
@@ -59,6 +63,25 @@ public class CustomerServiceImpl implements CustomerService {
 		if (StringUtils.isBlank(customerViewModel.getLastname())) {
 			throw new IllegalArgumentException("lastname must not be blank");
 		}
+	}
+
+	@Override
+	public void deleteCustomer(Long customerId) {
+		if (customerId == null) {
+			throw new IllegalArgumentException("customerId must not be null");
+		}
+
+		transactionManager.doInTransaction(ctx -> {
+			Customer customer = ctx
+					.customerRepository()
+					.findActiveById(customerId)
+					.orElseThrow(() -> new CustomerNotFoundException(customerId));
+			
+			customer.setDeleted(true);
+			ctx.customerRepository().save(customer);
+			
+			return null;
+		});
 	}
 
 }

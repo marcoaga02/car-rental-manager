@@ -11,6 +11,8 @@ public interface CustomerRepository {
 
 	Optional<Customer> findActiveByTaxIdCode(String taxIdCode);
 
+	Optional<Customer> findActiveById(Long id);
+
 	Customer save(Customer customer);
 
 }

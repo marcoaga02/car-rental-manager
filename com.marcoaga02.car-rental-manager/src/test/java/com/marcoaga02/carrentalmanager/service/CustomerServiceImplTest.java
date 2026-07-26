@@ -23,11 +23,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateTaxIdCodeException;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
 import com.marcoaga02.carrentalmanager.model.Customer;
@@ -233,15 +235,63 @@ class CustomerServiceImplTest {
 
 			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE,
 					A_FIRSTNAME, A_LASTNAME);
-			
+
 			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE))
 					.thenReturn(Optional.of(customer));
 
 			assertThatThrownBy(() -> customerService.createCustomer(inputViewModel))
 					.isInstanceOf(DuplicateTaxIdCodeException.class)
 					.hasMessage("A customer with taxIdCode '" + A_TAX_ID_CODE + "' already exists");
-			
+
 			verify(customerRepository).findActiveByTaxIdCode(A_TAX_ID_CODE);
+			verifyNoMoreInteractions(customerRepository);
+			verifyNoInteractions(customerMapper);
+		}
+
+	}
+
+	@Nested
+	class DeleteCustomer {
+
+		@Test
+		void testDeleteCustomerWhenInputIsNullThrowIllegalArgumentException() {
+			assertThatThrownBy(() -> customerService.deleteCustomer(null))
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("customerId must not be null");
+		}
+
+		@Test
+		void testDeleteCustomerWhenIdIsValidDeleteTheCustomer() {
+			stubTransaction();
+
+			when(customerRepository.findActiveById(AN_ID)).thenReturn(Optional.of(customer));
+			when(customerRepository.save(customer)).thenReturn(customer);
+
+			customerService.deleteCustomer(AN_ID);
+
+			ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+			verify(customerRepository).save(customerCaptor.capture());
+
+			Customer savedCustomer = customerCaptor.getValue();
+			assertThat(savedCustomer.getDeleted()).isTrue();
+			assertThat(savedCustomer).isSameAs(customer);
+
+			verify(customerRepository).findActiveById(AN_ID);
+			verifyNoMoreInteractions(customerRepository);
+			verifyNoInteractions(customerMapper);
+		}
+
+		@Test
+		void testDeleteCustomerWhenThereIsNoActiveCustomerWithSameIdThrowsCustomerNotFoundException() {
+			stubTransaction();
+
+			when(customerRepository.findActiveById(ANOTHER_ID)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> customerService.deleteCustomer(ANOTHER_ID))
+					.isInstanceOf(CustomerNotFoundException.class)
+					.hasMessage("Customer with id '" + ANOTHER_ID + "' not found");
+			
+			verify(customerRepository).findActiveById(ANOTHER_ID);
 			verifyNoMoreInteractions(customerRepository);
 			verifyNoInteractions(customerMapper);
 		}
