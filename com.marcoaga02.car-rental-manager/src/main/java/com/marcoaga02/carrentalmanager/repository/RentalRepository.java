@@ -11,6 +11,10 @@ public interface RentalRepository {
 
 	Optional<Rental> findActiveByCarId(Long carId);
 
+	Optional<Rental> findActiveById(Long id);
+
 	Rental save(Rental rental);
+
+	void deleteById(Long id);
 
 }

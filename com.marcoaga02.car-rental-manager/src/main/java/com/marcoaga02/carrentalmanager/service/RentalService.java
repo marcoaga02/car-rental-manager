@@ -11,4 +11,6 @@ public interface RentalService {
 	
 	RentalViewModel createRental(RentalCreationRequest request);
 	
+	void deleteRental(Long rentalId);
+
 }

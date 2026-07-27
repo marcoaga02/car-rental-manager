@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.marcoaga02.carrentalmanager.exception.CarAlreadyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
+import com.marcoaga02.carrentalmanager.exception.RentalNotFoundException;
 import com.marcoaga02.carrentalmanager.mapper.RentalMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.model.Customer;
@@ -386,6 +387,46 @@ class RentalServiceImplTest {
 			verifyNoInteractions(rentalMapper);
 		}
 
+	}
+	
+	@Nested
+	class deleteRental {
+		
+		@Test
+		void testDeleteRentalWhenInputIsNullThrowIllegalArgumentException() {
+			assertThatThrownBy(() -> rentalService.deleteRental(null))
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("rentalId must not be null");
+		}
+		
+		@Test
+		void testDeleteRentalWhenIdIsValidDeleteTheRental() {
+			stubTransaction().withRentalRepository();
+
+			when(rentalRepository.findActiveById(A_RENTAL_ID)).thenReturn(Optional.of(rental));
+
+			rentalService.deleteRental(A_RENTAL_ID);
+
+			InOrder inOrder = inOrder(rentalRepository);
+			inOrder.verify(rentalRepository).findActiveById(A_RENTAL_ID);
+			inOrder.verify(rentalRepository).deleteById(A_RENTAL_ID);
+			inOrder.verifyNoMoreInteractions();
+		}
+		
+		@Test
+		void testDeleteRentalWhenThereIsNoActiveRentalWithSameIdThrowsRentalNotFoundException() {
+			stubTransaction().withRentalRepository();
+
+			when(rentalRepository.findActiveById(ANOTHER_RENTAL_ID)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> rentalService.deleteRental(ANOTHER_RENTAL_ID))
+					.isInstanceOf(RentalNotFoundException.class)
+					.hasMessage("Rental with id '" + ANOTHER_RENTAL_ID + "' not found");
+
+			verify(rentalRepository).findActiveById(ANOTHER_RENTAL_ID);
+			verifyNoMoreInteractions(rentalRepository);
+		}
+		
 	}
 
 }
