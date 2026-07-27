@@ -286,9 +286,9 @@ class RentalServiceImplTest {
 						.isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("days must be a positive integer");
 			}
-			
+
 		}
-		
+
 		@Test
 		void testCreateRentalWhenInputIsValidAddTheNewRental() {
 			fullStubTransaction();
@@ -339,10 +339,10 @@ class RentalServiceImplTest {
 			assertThatThrownBy(() -> rentalService.createRental(request))
 					.isInstanceOf(CarNotFoundException.class)
 					.hasMessage("Car with id '" + A_CAR_ID + "' not found");
-			
+
 			verify(carRepository).findActiveById(A_CAR_ID);
 			verifyNoMoreInteractions(carRepository);
-			verifyNoInteractions(customerRepository, rentalRepository, rentalMapper);
+			verifyNoInteractions(rentalMapper);
 		}
 
 		@Test
@@ -358,13 +358,13 @@ class RentalServiceImplTest {
 			assertThatThrownBy(() -> rentalService.createRental(request))
 					.isInstanceOf(CustomerNotFoundException.class)
 					.hasMessage("Customer with id '" + A_CUSTOMER_ID + "' not found");
-			
+
 			verify(carRepository).findActiveById(A_CAR_ID);
 			verify(customerRepository).findActiveById(A_CUSTOMER_ID);
 			verifyNoMoreInteractions(carRepository, customerRepository);
-			verifyNoInteractions(rentalRepository, rentalMapper);
+			verifyNoInteractions(rentalMapper);
 		}
-		
+
 		@Test
 		void testCreateRentalWhenTheCarIsAlreadyRentedThrowCarAlreadyRentedException() {
 			fullStubTransaction();
@@ -373,13 +373,14 @@ class RentalServiceImplTest {
 					A_NUMBER_OF_DAYS);
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
-			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
+			when(customerRepository.findActiveById(A_CUSTOMER_ID))
+					.thenReturn(Optional.of(customer));
 			when(rentalRepository.findActiveByCarId(A_CAR_ID)).thenReturn(Optional.of(rental));
-			
+
 			assertThatThrownBy(() -> rentalService.createRental(request))
 					.isInstanceOf(CarAlreadyRentedException.class)
 					.hasMessage("Car with id '" + A_CAR_ID + "' is already rented");
-			
+
 			verify(carRepository).findActiveById(A_CAR_ID);
 			verify(customerRepository).findActiveById(A_CUSTOMER_ID);
 			verify(rentalRepository).findActiveByCarId(A_CAR_ID);
@@ -388,17 +389,17 @@ class RentalServiceImplTest {
 		}
 
 	}
-	
+
 	@Nested
 	class deleteRental {
-		
+
 		@Test
 		void testDeleteRentalWhenInputIsNullThrowIllegalArgumentException() {
 			assertThatThrownBy(() -> rentalService.deleteRental(null))
 					.isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("rentalId must not be null");
 		}
-		
+
 		@Test
 		void testDeleteRentalWhenIdIsValidDeleteTheRental() {
 			stubTransaction().withRentalRepository();
@@ -411,8 +412,10 @@ class RentalServiceImplTest {
 			inOrder.verify(rentalRepository).findActiveById(A_RENTAL_ID);
 			inOrder.verify(rentalRepository).deleteById(A_RENTAL_ID);
 			inOrder.verifyNoMoreInteractions();
+
+			verifyNoInteractions(rentalMapper);
 		}
-		
+
 		@Test
 		void testDeleteRentalWhenThereIsNoActiveRentalWithSameIdThrowsRentalNotFoundException() {
 			stubTransaction().withRentalRepository();
@@ -425,8 +428,9 @@ class RentalServiceImplTest {
 
 			verify(rentalRepository).findActiveById(ANOTHER_RENTAL_ID);
 			verifyNoMoreInteractions(rentalRepository);
+			verifyNoInteractions(rentalMapper);
 		}
-		
+
 	}
 
 }

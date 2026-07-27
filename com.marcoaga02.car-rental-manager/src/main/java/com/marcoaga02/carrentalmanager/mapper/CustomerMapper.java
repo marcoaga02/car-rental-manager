@@ -19,8 +19,7 @@ public class CustomerMapper {
 			return null;
 		}
 
-		return new Customer(customerViewModel.getTaxIdCode(),
-				customerViewModel.getFirstname(),
+		return new Customer(customerViewModel.getTaxIdCode(), customerViewModel.getFirstname(),
 				customerViewModel.getLastname());
 	}
 

@@ -9,7 +9,7 @@ public interface TransactionContext {
 	CarRepository carRepository();
 
 	CustomerRepository customerRepository();
-	
+
 	RentalRepository rentalRepository();
 
 }
