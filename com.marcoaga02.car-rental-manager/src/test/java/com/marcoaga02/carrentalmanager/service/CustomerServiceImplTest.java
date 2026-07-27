@@ -270,14 +270,16 @@ class CustomerServiceImplTest {
 			customerService.deleteCustomer(AN_ID);
 
 			ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
-			verify(customerRepository).save(customerCaptor.capture());
+
+			InOrder inOrder = inOrder(customerRepository);
+			inOrder.verify(customerRepository).findActiveById(AN_ID);
+			inOrder.verify(customerRepository).save(customerCaptor.capture());
+			inOrder.verifyNoMoreInteractions();
 
 			Customer savedCustomer = customerCaptor.getValue();
 			assertThat(savedCustomer.getDeleted()).isTrue();
 			assertThat(savedCustomer).isSameAs(customer);
 
-			verify(customerRepository).findActiveById(AN_ID);
-			verifyNoMoreInteractions(customerRepository);
 			verifyNoInteractions(customerMapper);
 		}
 

@@ -290,14 +290,16 @@ class CarServiceImplTest {
 			carService.deleteCar(AN_ID);
 
 			ArgumentCaptor<Car> carCaptor = ArgumentCaptor.forClass(Car.class);
-			verify(carRepository).save(carCaptor.capture());
-
+			
+			InOrder inOrder = inOrder(carRepository);
+			inOrder.verify(carRepository).findActiveById(AN_ID);
+			inOrder.verify(carRepository).save(carCaptor.capture());
+			inOrder.verifyNoMoreInteractions();
+			
 			Car savedCar = carCaptor.getValue();
 			assertThat(savedCar.getDeleted()).isTrue();
 			assertThat(savedCar).isSameAs(car);
 
-			verify(carRepository).findActiveById(AN_ID);
-			verifyNoMoreInteractions(carRepository);
 			verifyNoInteractions(carMapper);
 		}
 
