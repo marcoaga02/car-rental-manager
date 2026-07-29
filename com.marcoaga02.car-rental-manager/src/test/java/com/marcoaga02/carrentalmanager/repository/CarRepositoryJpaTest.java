@@ -3,27 +3,16 @@ package com.marcoaga02.carrentalmanager.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.marcoaga02.carrentalmanager.model.Car;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-
-@Testcontainers
-class CarRepositoryJpaTest {
+class CarRepositoryJpaTest extends BaseRepositoryTest {
 
 	private static final Long AN_ID = 10L;
 
@@ -39,47 +28,18 @@ class CarRepositoryJpaTest {
 	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
 
-	@SuppressWarnings("resource")
-	@Container
-	private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.4")
-			.withDatabaseName("carrental_test")
-			.withUsername("test")
-			.withPassword("test");
-
-	private EntityManagerFactory entityManagerFactory;
-
-	private EntityManager entityManager;
-
 	private CarRepositoryJpa carRepository;
 
 	@BeforeEach
-	void baseSetUp() {
-		Map<String, String> properties = new HashMap<>();
-		properties.put("jakarta.persistence.jdbc.url", postgres.getJdbcUrl());
-		properties.put("jakarta.persistence.jdbc.user", postgres.getUsername());
-		properties.put("jakarta.persistence.jdbc.password", postgres.getPassword());
-
-		entityManagerFactory = Persistence.createEntityManagerFactory("test-pu", properties);
-		entityManager = entityManagerFactory.createEntityManager();
-
+	void setUp() {
 		carRepository = new CarRepositoryJpa(entityManager);
-	}
-
-	@AfterEach
-	void baseTearDown() {
-		if (entityManager != null) {
-			entityManager.close();
-		}
-		if (entityManagerFactory != null) {
-			entityManagerFactory.close();
-		}
 	}
 
 	@Nested
 	class FindAllActive {
 
 		@Test
-		void testFindAllActiveWhenThereAreNoCarsAtAllReturnsAnEmptyList() {
+		void testFindAllActiveWhenThereAreNoCarsReturnsAnEmptyList() {
 			List<Car> result = carRepository.findAllActive();
 
 			assertThat(result).isEmpty();
