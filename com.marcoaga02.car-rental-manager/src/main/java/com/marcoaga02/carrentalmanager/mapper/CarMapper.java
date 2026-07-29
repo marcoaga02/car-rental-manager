@@ -10,8 +10,7 @@ public class CarMapper {
 			return null;
 		}
 
-		return new CarViewModel(car.getId(), car.getCarPlate(), car.getBrand(), car.getModel(),
-				car.getDailyRate());
+		return new CarViewModel(car.getId(), car.getCarPlate(), car.getBrand(), car.getModel(), car.getDailyRate());
 	}
 
 	public Car toEntity(CarViewModel carViewModel) {

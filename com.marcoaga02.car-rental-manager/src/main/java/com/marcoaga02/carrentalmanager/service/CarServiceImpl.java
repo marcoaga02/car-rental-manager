@@ -15,8 +15,9 @@ import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
 public class CarServiceImpl implements CarService {
 
-	private TransactionManager transactionManager;
-	private CarMapper carMapper;
+	private final TransactionManager transactionManager;
+
+	private final CarMapper carMapper;
 
 	public CarServiceImpl(TransactionManager transactionManager, CarMapper carMapper) {
 		this.transactionManager = transactionManager;
@@ -77,10 +78,7 @@ public class CarServiceImpl implements CarService {
 		}
 
 		transactionManager.doInTransaction(ctx -> {
-			Car car = ctx
-					.carRepository()
-					.findActiveById(carId)
-					.orElseThrow(() -> new CarNotFoundException(carId));
+			Car car = ctx.carRepository().findActiveById(carId).orElseThrow(() -> new CarNotFoundException(carId));
 
 			car.setDeleted(true);
 			ctx.carRepository().save(car);

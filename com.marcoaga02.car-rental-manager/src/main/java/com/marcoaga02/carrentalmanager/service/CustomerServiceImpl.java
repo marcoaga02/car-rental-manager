@@ -14,11 +14,11 @@ import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
 public class CustomerServiceImpl implements CustomerService {
 
-	private TransactionManager transactionManager;
-	private CustomerMapper customerMapper;
+	private final TransactionManager transactionManager;
 
-	public CustomerServiceImpl(TransactionManager transactionManager,
-			CustomerMapper customerMapper) {
+	private final CustomerMapper customerMapper;
+
+	public CustomerServiceImpl(TransactionManager transactionManager, CustomerMapper customerMapper) {
 		this.transactionManager = transactionManager;
 		this.customerMapper = customerMapper;
 	}
@@ -38,12 +38,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final String taxIdCode = customerViewModel.getTaxIdCode();
-			ctx
-					.customerRepository()
-					.findActiveByTaxIdCode(taxIdCode)
-					.ifPresent(existingCustomer -> {
-						throw new DuplicateTaxIdCodeException(taxIdCode);
-					});
+			ctx.customerRepository().findActiveByTaxIdCode(taxIdCode).ifPresent(existingCustomer -> {
+				throw new DuplicateTaxIdCodeException(taxIdCode);
+			});
 
 			Customer toSave = customerMapper.toEntity(customerViewModel);
 			return customerMapper.toViewModel(ctx.customerRepository().save(toSave));

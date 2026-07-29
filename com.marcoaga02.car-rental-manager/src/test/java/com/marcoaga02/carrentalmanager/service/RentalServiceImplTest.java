@@ -110,8 +110,7 @@ class RentalServiceImplTest {
 	private static final BigDecimal A_TOTAL_AMOUNT = BigDecimal.valueOf(61.2);
 	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = BigDecimal.valueOf(12.9);
 
-	private final Clock fixedClock = Clock
-			.fixed(A_START_DATE.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+	private final Clock fixedClock = Clock.fixed(A_START_DATE.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
 	private Rental rental, anotherRental;
 	private RentalViewModel rentalViewModel, anotherRentalViewModel;
@@ -127,18 +126,14 @@ class RentalServiceImplTest {
 		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
-		rentalViewModel = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE,
-				A_NUMBER_OF_DAYS, A_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
+		rentalViewModel = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS, A_FULLNAME,
+				A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
 
-		Car anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-		Customer anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-		anotherRental = new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE,
-				ANOTHER_NUMBER_OF_DAYS);
-		anotherRentalViewModel = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE,
-				ANOTHER_END_DATE, ANOTHER_NUMBER_OF_DAYS, ANOTHER_FULLNAME, ANOTHER_CAR_DESCRIPTION,
-				ANOTHER_TOTAL_AMOUNT);
+		Car anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+		Customer anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+		anotherRental = new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE, ANOTHER_NUMBER_OF_DAYS);
+		anotherRentalViewModel = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
+				ANOTHER_NUMBER_OF_DAYS, ANOTHER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
 	}
 
 	// Required by the strict stubbing of MockitoExtension
@@ -220,9 +215,7 @@ class RentalServiceImplTest {
 					.sorted(Comparator.comparing(RentalViewModel::getId))
 					.collect(Collectors.toList());
 
-			assertThat(result)
-					.hasSize(2)
-					.containsExactlyInAnyOrder(rentalViewModel, anotherRentalViewModel);
+			assertThat(result).hasSize(2).containsExactlyInAnyOrder(rentalViewModel, anotherRentalViewModel);
 
 			verify(rentalRepository).findAllActive();
 			verify(rentalMapper).toViewModel(rental);
@@ -247,8 +240,7 @@ class RentalServiceImplTest {
 
 			@Test
 			void testCreateRentalWhenCarIdIsNullThrowIllegalArgumentException() {
-				RentalCreationRequest illegalRequest = new RentalCreationRequest(null,
-						A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
+				RentalCreationRequest illegalRequest = new RentalCreationRequest(null, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -257,8 +249,7 @@ class RentalServiceImplTest {
 
 			@Test
 			void testCreateRentalWhenCustomerIdIsNullThrowIllegalArgumentException() {
-				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, null,
-						A_NUMBER_OF_DAYS);
+				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, null, A_NUMBER_OF_DAYS);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -267,8 +258,7 @@ class RentalServiceImplTest {
 
 			@Test
 			void testCreateRentalWhenDaysIsNullThrowIllegalArgumentException() {
-				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID,
-						A_CUSTOMER_ID, null);
+				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, null);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -277,10 +267,8 @@ class RentalServiceImplTest {
 
 			@ParameterizedTest
 			@ValueSource(ints = { 0, -1 })
-			void testCreateRentalWhenDaysIsNotPositiveThrowIllegalArgumentException(
-					Integer invalidDays) {
-				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID,
-						A_CUSTOMER_ID, invalidDays);
+			void testCreateRentalWhenDaysIsNotPositiveThrowIllegalArgumentException(Integer invalidDays) {
+				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, invalidDays);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -293,12 +281,10 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenInputIsValidAddTheNewRental() {
 			fullStubTransaction();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID,
-					A_NUMBER_OF_DAYS);
+			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
-			when(customerRepository.findActiveById(A_CUSTOMER_ID))
-					.thenReturn(Optional.of(customer));
+			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
 			when(rentalRepository.findActiveByCarId(A_CAR_ID)).thenReturn(Optional.empty());
 
 			Rental savedRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
@@ -311,8 +297,7 @@ class RentalServiceImplTest {
 
 			ArgumentCaptor<Rental> rentalCaptor = ArgumentCaptor.forClass(Rental.class);
 
-			InOrder inOrder = inOrder(carRepository, customerRepository, rentalRepository,
-					rentalMapper);
+			InOrder inOrder = inOrder(carRepository, customerRepository, rentalRepository, rentalMapper);
 			inOrder.verify(carRepository).findActiveById(A_CAR_ID);
 			inOrder.verify(customerRepository).findActiveById(A_CUSTOMER_ID);
 			inOrder.verify(rentalRepository).findActiveByCarId(A_CAR_ID);
@@ -331,8 +316,7 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenCarIdIsInvalidThrowsCarNotFoundException() {
 			stubTransaction().withCarRepository();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID,
-					A_NUMBER_OF_DAYS);
+			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.empty());
 
@@ -349,8 +333,7 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenCustomerIdIsInvalidThrowsCustomerNotFoundException() {
 			stubTransaction().withCarRepository().withCustomerRepository();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID,
-					A_NUMBER_OF_DAYS);
+			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.empty());
@@ -369,12 +352,10 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenTheCarIsAlreadyRentedThrowCarAlreadyRentedException() {
 			fullStubTransaction();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID,
-					A_NUMBER_OF_DAYS);
+			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
-			when(customerRepository.findActiveById(A_CUSTOMER_ID))
-					.thenReturn(Optional.of(customer));
+			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
 			when(rentalRepository.findActiveByCarId(A_CAR_ID)).thenReturn(Optional.of(rental));
 
 			assertThatThrownBy(() -> rentalService.createRental(request))
