@@ -26,7 +26,6 @@ import jakarta.persistence.Persistence;
 class CarRepositoryJpaTest {
 
 	private static final Long AN_ID = 10L;
-	private static final Long ANOTHER_ID = 15L;
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
