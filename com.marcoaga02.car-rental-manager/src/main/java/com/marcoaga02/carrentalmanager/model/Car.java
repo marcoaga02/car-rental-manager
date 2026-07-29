@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 @Table(name = "cars")
 public class Car extends BaseEntity {
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String carPlate;
 
 	@Column(nullable = false)
