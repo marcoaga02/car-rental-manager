@@ -25,8 +25,7 @@ public class RentalServiceImpl implements RentalService {
 
 	private final Clock clock;
 
-	public RentalServiceImpl(TransactionManager transactionManager, RentalMapper rentalMapper,
-			Clock clock) {
+	public RentalServiceImpl(TransactionManager transactionManager, RentalMapper rentalMapper, Clock clock) {
 		this.transactionManager = transactionManager;
 		this.rentalMapper = rentalMapper;
 		this.clock = clock;
@@ -47,10 +46,7 @@ public class RentalServiceImpl implements RentalService {
 
 		return transactionManager.doInTransaction(ctx -> {
 			final Long carId = request.getCarId();
-			Car car = ctx
-					.carRepository()
-					.findActiveById(carId)
-					.orElseThrow(() -> new CarNotFoundException(carId));
+			Car car = ctx.carRepository().findActiveById(carId).orElseThrow(() -> new CarNotFoundException(carId));
 
 			final Long customerId = request.getCustomerId();
 			Customer customer = ctx
@@ -92,10 +88,7 @@ public class RentalServiceImpl implements RentalService {
 		}
 
 		transactionManager.doInTransaction(ctx -> {
-			ctx
-					.rentalRepository()
-					.findActiveById(rentalId)
-					.orElseThrow(() -> new RentalNotFoundException(rentalId));
+			ctx.rentalRepository().findActiveById(rentalId).orElseThrow(() -> new RentalNotFoundException(rentalId));
 
 			ctx.rentalRepository().deleteById(rentalId);
 			return null;

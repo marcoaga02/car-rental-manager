@@ -49,8 +49,7 @@ public class RentalCreationRequest {
 
 	@Override
 	public String toString() {
-		return "RentalCreationRequest [carId=" + carId + ", customerId=" + customerId + ", days="
-				+ days + "]";
+		return "RentalCreationRequest [carId=" + carId + ", customerId=" + customerId + ", days=" + days + "]";
 	}
 
 }

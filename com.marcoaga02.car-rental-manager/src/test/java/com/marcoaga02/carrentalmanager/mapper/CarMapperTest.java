@@ -50,8 +50,7 @@ class CarMapperTest {
 
 	@Test
 	void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
-		CarViewModel carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL,
-				A_DAILY_RATE);
+		CarViewModel carViewModel = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
 		Car result = carMapper.toEntity(carViewModel);
 

@@ -51,14 +51,13 @@ public class CustomerViewModel {
 			return false;
 		CustomerViewModel other = (CustomerViewModel) obj;
 		return Objects.equals(firstname, other.firstname) && Objects.equals(id, other.id)
-				&& Objects.equals(lastname, other.lastname)
-				&& Objects.equals(taxIdCode, other.taxIdCode);
+				&& Objects.equals(lastname, other.lastname) && Objects.equals(taxIdCode, other.taxIdCode);
 	}
 
 	@Override
 	public String toString() {
-		return "CustomerViewModel [id=" + id + ", taxIdCode=" + taxIdCode + ", firstname="
-				+ firstname + ", lastname=" + lastname + "]";
+		return "CustomerViewModel [id=" + id + ", taxIdCode=" + taxIdCode + ", firstname=" + firstname + ", lastname="
+				+ lastname + "]";
 	}
 
 }

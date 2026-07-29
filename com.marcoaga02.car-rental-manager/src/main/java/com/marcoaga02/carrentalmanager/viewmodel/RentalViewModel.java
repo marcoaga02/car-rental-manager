@@ -20,8 +20,8 @@ public class RentalViewModel {
 
 	private BigDecimal totalAmount;
 
-	public RentalViewModel(Long id, LocalDate startDate, LocalDate endDate, Integer rentalDays,
-			String customerFullname, String carDescription, BigDecimal totalAmount) {
+	public RentalViewModel(Long id, LocalDate startDate, LocalDate endDate, Integer rentalDays, String customerFullname,
+			String carDescription, BigDecimal totalAmount) {
 		this.id = id;
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -61,9 +61,7 @@ public class RentalViewModel {
 
 	@Override
 	public int hashCode() {
-		return Objects
-				.hash(carDescription, customerFullname, endDate, id, rentalDays, startDate,
-						totalAmount);
+		return Objects.hash(carDescription, customerFullname, endDate, id, rentalDays, startDate, totalAmount);
 	}
 
 	@Override
@@ -76,18 +74,16 @@ public class RentalViewModel {
 			return false;
 		RentalViewModel other = (RentalViewModel) obj;
 		return Objects.equals(carDescription, other.carDescription)
-				&& Objects.equals(customerFullname, other.customerFullname)
-				&& Objects.equals(endDate, other.endDate) && Objects.equals(id, other.id)
-				&& Objects.equals(rentalDays, other.rentalDays)
-				&& Objects.equals(startDate, other.startDate)
-				&& Objects.equals(totalAmount, other.totalAmount);
+				&& Objects.equals(customerFullname, other.customerFullname) && Objects.equals(endDate, other.endDate)
+				&& Objects.equals(id, other.id) && Objects.equals(rentalDays, other.rentalDays)
+				&& Objects.equals(startDate, other.startDate) && Objects.equals(totalAmount, other.totalAmount);
 	}
 
 	@Override
 	public String toString() {
-		return "RentalViewModel [id=" + id + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", rentalDays=" + rentalDays + ", customerFullname=" + customerFullname
-				+ ", carDescription=" + carDescription + ", totalAmount=" + totalAmount + "]";
+		return "RentalViewModel [id=" + id + ", startDate=" + startDate + ", endDate=" + endDate + ", rentalDays="
+				+ rentalDays + ", customerFullname=" + customerFullname + ", carDescription=" + carDescription
+				+ ", totalAmount=" + totalAmount + "]";
 	}
 
 }

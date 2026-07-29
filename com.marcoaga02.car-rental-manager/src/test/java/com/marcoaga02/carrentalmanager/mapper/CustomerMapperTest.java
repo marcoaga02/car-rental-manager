@@ -46,8 +46,7 @@ class CustomerMapperTest {
 
 	@Test
 	void testToEntityWhenInputIsValidReturnTheCorrectMapping() {
-		CustomerViewModel customerViewModel = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
-				A_FIRSTNAME, A_LASTNAME);
+		CustomerViewModel customerViewModel = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
 		Customer result = customerMapper.toEntity(customerViewModel);
 

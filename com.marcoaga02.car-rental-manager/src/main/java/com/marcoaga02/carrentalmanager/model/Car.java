@@ -74,8 +74,8 @@ public class Car extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model
-				+ ", dailyRate=" + dailyRate + ", deleted=" + deleted + "]";
+		return "Car [carPlate=" + carPlate + ", brand=" + brand + ", model=" + model + ", dailyRate=" + dailyRate
+				+ ", deleted=" + deleted + "]";
 	}
 
 }

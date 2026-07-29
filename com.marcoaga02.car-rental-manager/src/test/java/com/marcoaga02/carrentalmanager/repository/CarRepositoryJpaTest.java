@@ -42,8 +42,7 @@ class CarRepositoryJpaTest {
 
 	@SuppressWarnings("resource")
 	@Container
-	private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-			"postgres:18.4")
+	private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.4")
 			.withDatabaseName("carrental_test")
 			.withUsername("test")
 			.withPassword("test");
@@ -109,8 +108,7 @@ class CarRepositoryJpaTest {
 		@Test
 		void testFindAllActiveWhenThereAreMultipleActiveCarsReturnAListWithAllActiveElements() {
 			Car firstCar = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Car secondCar = persistCar(
-					new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+			Car secondCar = persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
 			persistDeletedCar();
 
 			List<Car> result = carRepository.findAllActive();
@@ -220,51 +218,50 @@ class CarRepositoryJpaTest {
 
 		@Test
 		void testSaveWhenCarIsNewPersistsItAndReturnsItWithGeneratedId() {
-		    Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+			Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 
-		    entityManager.getTransaction().begin();
-		    Car result = carRepository.save(car);
-		    entityManager.getTransaction().commit();
+			entityManager.getTransaction().begin();
+			Car result = carRepository.save(car);
+			entityManager.getTransaction().commit();
 
-		    assertThat(result.getId()).isNotNull();
-		    assertThat(result.getCarPlate()).isEqualTo(A_CAR_PLATE);
+			assertThat(result.getId()).isNotNull();
+			assertThat(result.getCarPlate()).isEqualTo(A_CAR_PLATE);
 		}
 
 		@Test
 		void testSaveWhenCarIsNewCanBeRetrievedDirectlyFromDatabase() {
-		    entityManager.getTransaction().begin();
-		    Car car = carRepository.save(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		    entityManager.getTransaction().commit();
+			entityManager.getTransaction().begin();
+			Car car = carRepository.save(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			entityManager.getTransaction().commit();
 
-		    entityManager.clear();
-		    
-		    Car reloaded = entityManager.find(Car.class, car.getId());
-		    
-		    assertThat(reloaded).isEqualTo(car);
+			entityManager.clear();
+
+			Car reloaded = entityManager.find(Car.class, car.getId());
+
+			assertThat(reloaded).isEqualTo(car);
 		}
 
 		@Test
 		void testSaveWhenCarAlreadyExistsUpdatesItsFieldsInDatabase() {
-		    Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		    car.setDeleted(true);
+			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			car.setDeleted(true);
 
-		    entityManager.getTransaction().begin();
-		    carRepository.save(car);
-		    entityManager.getTransaction().commit();
+			entityManager.getTransaction().begin();
+			carRepository.save(car);
+			entityManager.getTransaction().commit();
 
-		    entityManager.clear();
-		    
-		    Car reloaded = entityManager.find(Car.class, car.getId());
-		    
-		    assertThat(reloaded).isEqualTo(car);
-		    assertThat(reloaded.getDeleted()).isTrue();
+			entityManager.clear();
+
+			Car reloaded = entityManager.find(Car.class, car.getId());
+
+			assertThat(reloaded).isEqualTo(car);
+			assertThat(reloaded.getDeleted()).isTrue();
 		}
 
 	}
 
 	private void persistDeletedCar() {
-		Car deletedCar = new Car("aDeletedPlate", "aDeletedBrand", "aDeletedModel",
-				BigDecimal.valueOf(12.3));
+		Car deletedCar = new Car("aDeletedPlate", "aDeletedBrand", "aDeletedModel", BigDecimal.valueOf(12.3));
 		deletedCar.setDeleted(true);
 
 		persistCar(deletedCar);

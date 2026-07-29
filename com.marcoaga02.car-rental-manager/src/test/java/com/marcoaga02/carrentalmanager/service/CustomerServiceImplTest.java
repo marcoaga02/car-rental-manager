@@ -78,8 +78,8 @@ class CustomerServiceImplTest {
 		customerViewModel = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
 		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
-		anotherCustomerViewModel = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE,
-				ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+		anotherCustomerViewModel = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
+				ANOTHER_LASTNAME);
 	}
 
 	// Required by the strict stubbing of MockitoExtension
@@ -138,9 +138,7 @@ class CustomerServiceImplTest {
 					.sorted(Comparator.comparing(CustomerViewModel::getId))
 					.collect(Collectors.toList());
 
-			assertThat(result)
-					.hasSize(2)
-					.containsExactlyInAnyOrder(customerViewModel, anotherCustomerViewModel);
+			assertThat(result).hasSize(2).containsExactlyInAnyOrder(customerViewModel, anotherCustomerViewModel);
 
 			verify(customerRepository).findAllActive();
 			verify(customerMapper).toViewModel(customer);
@@ -166,10 +164,9 @@ class CustomerServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCustomerWhenTaxIdCodeIsNullOrBlankThrowIllegalArgumentException(
-					String invalidTaxIdCode) {
-				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, invalidTaxIdCode,
-						A_FIRSTNAME, A_LASTNAME);
+			void testCreateCustomerWhenTaxIdCodeIsNullOrBlankThrowIllegalArgumentException(String invalidTaxIdCode) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, invalidTaxIdCode, A_FIRSTNAME,
+						A_LASTNAME);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -179,10 +176,9 @@ class CustomerServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCustomerWhenFirstnameIsNullOrBlankThrowIllegalArgumentException(
-					String invalidFirstname) {
-				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
-						invalidFirstname, A_LASTNAME);
+			void testCreateCustomerWhenFirstnameIsNullOrBlankThrowIllegalArgumentException(String invalidFirstname) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, invalidFirstname,
+						A_LASTNAME);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -192,10 +188,9 @@ class CustomerServiceImplTest {
 			@ParameterizedTest
 			@NullSource
 			@ValueSource(strings = { "", " ", " \t" })
-			void testCreateCustomerWhenLastnameIsNullOrBlankThrowIllegalArgumentException(
-					String invalidLastname) {
-				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE,
-						A_FIRSTNAME, invalidLastname);
+			void testCreateCustomerWhenLastnameIsNullOrBlankThrowIllegalArgumentException(String invalidLastname) {
+				CustomerViewModel invalidCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME,
+						invalidLastname);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
 						.isInstanceOf(IllegalArgumentException.class)
@@ -208,11 +203,9 @@ class CustomerServiceImplTest {
 		void testCreateCustomerWhenInputIsValidAddTheNewCustomer() {
 			stubTransaction();
 
-			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE,
-					A_FIRSTNAME, A_LASTNAME);
+			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
-			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE))
-					.thenReturn(Optional.empty());
+			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE)).thenReturn(Optional.empty());
 			when(customerMapper.toEntity(inputViewModel)).thenReturn(customer);
 			when(customerRepository.save(customer)).thenReturn(customer);
 			when(customerMapper.toViewModel(customer)).thenReturn(customerViewModel);
@@ -233,11 +226,9 @@ class CustomerServiceImplTest {
 		void testCreateCustomerWhenExistAnActiveCustomerWithSameTaxIdCodeThrowsDuplicateTaxIdCodeException() {
 			stubTransaction();
 
-			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE,
-					A_FIRSTNAME, A_LASTNAME);
+			CustomerViewModel inputViewModel = new CustomerViewModel(null, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
-			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE))
-					.thenReturn(Optional.of(customer));
+			when(customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE)).thenReturn(Optional.of(customer));
 
 			assertThatThrownBy(() -> customerService.createCustomer(inputViewModel))
 					.isInstanceOf(DuplicateTaxIdCodeException.class)

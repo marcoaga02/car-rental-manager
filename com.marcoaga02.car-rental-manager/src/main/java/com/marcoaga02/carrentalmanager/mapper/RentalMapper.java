@@ -19,17 +19,13 @@ public class RentalMapper {
 		final Customer customer = rental.getCustomer();
 
 		final LocalDate endDate = rental.getStartDate().plusDays(rental.getDays());
-		final String customerFullname = String
-				.format("%s %s", customer.getFirstname(), customer.getLastname());
-		final String carDescription = String
-				.format("%s %s [%s]", car.getBrand(), car.getModel(), car.getCarPlate());
+		final String customerFullname = String.format("%s %s", customer.getFirstname(), customer.getLastname());
+		final String carDescription = String.format("%s %s [%s]", car.getBrand(), car.getModel(), car.getCarPlate());
 
-		final BigDecimal totalAmount = car
-				.getDailyRate()
-				.multiply(BigDecimal.valueOf(rental.getDays()));
+		final BigDecimal totalAmount = car.getDailyRate().multiply(BigDecimal.valueOf(rental.getDays()));
 
-		return new RentalViewModel(rental.getId(), rental.getStartDate(), endDate, rental.getDays(),
-				customerFullname, carDescription, totalAmount);
+		return new RentalViewModel(rental.getId(), rental.getStartDate(), endDate, rental.getDays(), customerFullname,
+				carDescription, totalAmount);
 	}
 
 }

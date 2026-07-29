@@ -18,8 +18,7 @@ public class CarRepositoryJpa implements CarRepository {
 
 	@Override
 	public List<Car> findAllActive() {
-		TypedQuery<Car> query = entityManager
-				.createQuery("SELECT c FROM Car c WHERE c.deleted = false", Car.class);
+		TypedQuery<Car> query = entityManager.createQuery("SELECT c FROM Car c WHERE c.deleted = false", Car.class);
 
 		return query.getResultList();
 	}
@@ -27,32 +26,28 @@ public class CarRepositoryJpa implements CarRepository {
 	@Override
 	public Optional<Car> findActiveByCarPlate(String carPlate) {
 		TypedQuery<Car> query = entityManager
-				.createQuery(
-						"SELECT c FROM Car c WHERE c.carPlate = :carPlate AND c.deleted = false",
-						Car.class);
+				.createQuery("SELECT c FROM Car c WHERE c.carPlate = :carPlate AND c.deleted = false", Car.class);
 		query.setParameter("carPlate", carPlate);
-		
+
 		return query.getResultStream().findFirst();
 	}
 
 	@Override
 	public Optional<Car> findActiveById(Long id) {
 		TypedQuery<Car> query = entityManager
-				.createQuery(
-						"SELECT c FROM Car c WHERE c.id = :id AND c.deleted = false",
-						Car.class);
+				.createQuery("SELECT c FROM Car c WHERE c.id = :id AND c.deleted = false", Car.class);
 		query.setParameter("id", id);
-		
+
 		return query.getResultStream().findFirst();
 	}
 
 	@Override
 	public Car save(Car car) {
-	    if (car.getId() == null) {
-	        entityManager.persist(car);
-	        return car;
-	    }
-	    
-	    return entityManager.merge(car);
+		if (car.getId() == null) {
+			entityManager.persist(car);
+			return car;
+		}
+
+		return entityManager.merge(car);
 	}
 }

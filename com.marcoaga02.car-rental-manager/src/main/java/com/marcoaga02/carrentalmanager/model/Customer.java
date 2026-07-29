@@ -65,8 +65,8 @@ public class Customer extends BaseEntity {
 
 	@Override
 	public String toString() {
-		return "Customer [taxIdCode=" + taxIdCode + ", firstname=" + firstname + ", lastname="
-				+ lastname + ", deleted=" + deleted + "]";
+		return "Customer [taxIdCode=" + taxIdCode + ", firstname=" + firstname + ", lastname=" + lastname + ", deleted="
+				+ deleted + "]";
 	}
 
 }
