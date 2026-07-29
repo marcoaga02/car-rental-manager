@@ -27,7 +27,7 @@ class CarRepositoryJpaTest extends BaseRepositoryTest {
 
 	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
-	
+
 	private CarRepositoryJpa carRepository;
 
 	@BeforeEach
@@ -39,7 +39,7 @@ class CarRepositoryJpaTest extends BaseRepositoryTest {
 	class FindAllActive {
 
 		@Test
-		void testFindAllActiveWhenThereAreNoCarsAtAllReturnsAnEmptyList() {
+		void testFindAllActiveWhenThereAreNoCarsReturnsAnEmptyList() {
 			List<Car> result = carRepository.findAllActive();
 
 			assertThat(result).isEmpty();
