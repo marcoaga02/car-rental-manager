@@ -226,7 +226,7 @@ class RentalServiceImplTest {
 	}
 
 	@Nested
-	class createRental {
+	class CreateRental {
 
 		@Nested
 		class InputValidation {
@@ -372,7 +372,7 @@ class RentalServiceImplTest {
 	}
 
 	@Nested
-	class deleteRental {
+	class DeleteRental {
 
 		@Test
 		void testDeleteRentalWhenInputIsNullThrowIllegalArgumentException() {
