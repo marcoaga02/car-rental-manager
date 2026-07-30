@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.marcoaga02.carrentalmanager.model.Customer;
-import com.marcoaga02.carrentalmanager.repository.BaseRepositoryTest;
+import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 
-class CustomerRepositoryJpaTest extends BaseRepositoryTest {
+class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 	private static final Long AN_ID = 10L;
 
