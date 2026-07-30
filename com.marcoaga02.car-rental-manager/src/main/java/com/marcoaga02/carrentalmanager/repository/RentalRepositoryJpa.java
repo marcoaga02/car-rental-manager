@@ -24,7 +24,7 @@ public class RentalRepositoryJpa implements RentalRepository {
 	public List<Rental> findAllActive() {
 		TypedQuery<Rental> query = entityManager
 				.createQuery("SELECT r FROM Rental r WHERE (r.startDate + r.days day) > :today", Rental.class);
-		query.setParameter("today", LocalDate.now(clock));
+		query.setParameter("today", today());
 
 		return query.getResultList();
 	}
@@ -35,7 +35,7 @@ public class RentalRepositoryJpa implements RentalRepository {
 				.createQuery("SELECT r FROM Rental r WHERE r.car.id = :carId AND (r.startDate + r.days day) > :today",
 						Rental.class);
 		query.setParameter("carId", carId);
-		query.setParameter("today", LocalDate.now(clock));
+		query.setParameter("today", today());
 
 		return query.getResultStream().findFirst();
 	}
@@ -46,7 +46,7 @@ public class RentalRepositoryJpa implements RentalRepository {
 				.createQuery("SELECT r FROM Rental r WHERE r.id = :id AND (r.startDate + r.days day) > :today",
 						Rental.class);
 		query.setParameter("id", id);
-		query.setParameter("today", LocalDate.now(clock));
+		query.setParameter("today", today());
 
 		return query.getResultStream().findFirst();
 	}
@@ -66,6 +66,10 @@ public class RentalRepositoryJpa implements RentalRepository {
 		Rental rental = entityManager.find(Rental.class, id);
 
 		entityManager.remove(rental);
+	}
+
+	private LocalDate today() {
+		return LocalDate.now(clock);
 	}
 
 }
