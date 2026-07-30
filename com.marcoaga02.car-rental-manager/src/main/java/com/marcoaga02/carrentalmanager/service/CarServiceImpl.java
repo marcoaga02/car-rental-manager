@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.marcoaga02.carrentalmanager.exception.CarCurrentlyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
@@ -71,7 +72,6 @@ public class CarServiceImpl implements CarService {
 		}
 	}
 
-	// TODO aggiungere controllo di integrità sui noleggi attivi prima di cancellare un customer
 	@Override
 	public void deleteCar(Long carId) {
 		if (carId == null) {
@@ -80,6 +80,9 @@ public class CarServiceImpl implements CarService {
 
 		transactionManager.doInTransaction(ctx -> {
 			Car car = ctx.carRepository().findActiveById(carId).orElseThrow(() -> new CarNotFoundException(carId));
+			ctx.rentalRepository().findActiveByCarId(carId).ifPresent(activeRental -> {
+				throw new CarCurrentlyRentedException(carId);
+			});
 
 			car.setDeleted(true);
 			ctx.carRepository().save(car);
