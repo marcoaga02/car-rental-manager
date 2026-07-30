@@ -11,6 +11,8 @@ public interface RentalRepository {
 
 	boolean existsActiveByCarId(Long carId);
 
+	boolean existsActiveByCustomerId(Long customerId);
+
 	Optional<Rental> findActiveById(Long id);
 
 	Rental save(Rental rental);
