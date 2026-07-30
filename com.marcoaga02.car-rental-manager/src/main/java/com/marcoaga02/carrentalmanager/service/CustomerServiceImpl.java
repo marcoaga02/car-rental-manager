@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.marcoaga02.carrentalmanager.exception.CustomerHasActiveRentalException;
 import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateTaxIdCodeException;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
@@ -62,7 +63,6 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 	}
 
-	// TODO aggiungere controllo di integrità sui noleggi attivi prima di cancellare un customer
 	@Override
 	public void deleteCustomer(Long customerId) {
 		if (customerId == null) {
@@ -74,6 +74,10 @@ public class CustomerServiceImpl implements CustomerService {
 					.customerRepository()
 					.findActiveById(customerId)
 					.orElseThrow(() -> new CustomerNotFoundException(customerId));
+
+			if (ctx.rentalRepository().existsActiveByCustomerId(customerId)) {
+				throw new CustomerHasActiveRentalException(customerId);
+			}
 
 			customer.setDeleted(true);
 			ctx.customerRepository().save(customer);

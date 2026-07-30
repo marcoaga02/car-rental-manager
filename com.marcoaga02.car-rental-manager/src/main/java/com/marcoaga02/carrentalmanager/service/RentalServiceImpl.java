@@ -54,9 +54,9 @@ public class RentalServiceImpl implements RentalService {
 					.findActiveById(customerId)
 					.orElseThrow(() -> new CustomerNotFoundException(customerId));
 
-			ctx.rentalRepository().findActiveByCarId(carId).ifPresent(existingRental -> {
+			if (ctx.rentalRepository().existsActiveByCarId(carId)) {
 				throw new CarAlreadyRentedException(carId);
-			});
+			}
 
 			Rental rental = new Rental(car, customer, LocalDate.now(clock), request.getDays());
 			return rentalMapper.toViewModel(ctx.rentalRepository().save(rental));

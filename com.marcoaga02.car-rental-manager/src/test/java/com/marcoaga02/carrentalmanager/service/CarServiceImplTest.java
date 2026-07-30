@@ -30,11 +30,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.marcoaga02.carrentalmanager.exception.CarCurrentlyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.repository.CarRepository;
+import com.marcoaga02.carrentalmanager.repository.RentalRepository;
 import com.marcoaga02.carrentalmanager.transaction.TransactionCode;
 import com.marcoaga02.carrentalmanager.transaction.TransactionContext;
 import com.marcoaga02.carrentalmanager.transaction.TransactionManager;
@@ -51,6 +53,9 @@ class CarServiceImplTest {
 
 	@Mock
 	private CarRepository carRepository;
+
+	@Mock
+	private RentalRepository rentalRepository;
 
 	@Mock
 	private CarMapper carMapper;
@@ -87,10 +92,16 @@ class CarServiceImplTest {
 	}
 
 	// Required by the strict stubbing of MockitoExtension
-	private void stubTransaction() {
+	private CarServiceImplTest stubTransaction() {
 		when(transactionContext.carRepository()).thenReturn(carRepository);
 		when(transactionManager.doInTransaction(any()))
 				.thenAnswer(answer((TransactionCode<?> code) -> code.apply(transactionContext)));
+
+		return this;
+	}
+
+	private void withRentalRepository() {
+		when(transactionContext.rentalRepository()).thenReturn(rentalRepository);
 	}
 
 	@Nested
@@ -270,17 +281,19 @@ class CarServiceImplTest {
 
 		@Test
 		void testDeleteCarWhenIdIsValidDeleteTheCar() {
-			stubTransaction();
+			stubTransaction().withRentalRepository();
 
 			when(carRepository.findActiveById(AN_ID)).thenReturn(Optional.of(car));
+			when(rentalRepository.existsActiveByCarId(AN_ID)).thenReturn(false);
 			when(carRepository.save(car)).thenReturn(car);
 
 			carService.deleteCar(AN_ID);
 
 			ArgumentCaptor<Car> carCaptor = ArgumentCaptor.forClass(Car.class);
 
-			InOrder inOrder = inOrder(carRepository);
+			InOrder inOrder = inOrder(carRepository, rentalRepository);
 			inOrder.verify(carRepository).findActiveById(AN_ID);
+			inOrder.verify(rentalRepository).existsActiveByCarId(AN_ID);
 			inOrder.verify(carRepository).save(carCaptor.capture());
 			inOrder.verifyNoMoreInteractions();
 
@@ -303,6 +316,23 @@ class CarServiceImplTest {
 
 			verify(carRepository).findActiveById(ANOTHER_ID);
 			verifyNoMoreInteractions(carRepository);
+			verifyNoInteractions(carMapper, rentalRepository);
+		}
+
+		@Test
+		void testDeleteCarWhenIsCurrentlyRentedThrowCarCurrentlyRentedException() {
+			stubTransaction().withRentalRepository();
+
+			when(carRepository.findActiveById(AN_ID)).thenReturn(Optional.of(car));
+			when(rentalRepository.existsActiveByCarId(AN_ID)).thenReturn(true);
+
+			assertThatThrownBy(() -> carService.deleteCar(AN_ID))
+					.isInstanceOf(CarCurrentlyRentedException.class)
+					.hasMessage("Car with id '" + AN_ID + "' is currently rented and cannot be deleted");
+
+			verify(carRepository).findActiveById(AN_ID);
+			verify(rentalRepository).existsActiveByCarId(AN_ID);
+			verifyNoMoreInteractions(carRepository, rentalRepository);
 			verifyNoInteractions(carMapper);
 		}
 

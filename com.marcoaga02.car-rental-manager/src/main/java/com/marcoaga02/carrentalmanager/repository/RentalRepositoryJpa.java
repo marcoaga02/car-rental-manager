@@ -32,14 +32,27 @@ public class RentalRepositoryJpa implements RentalRepository {
 	}
 
 	@Override
-	public Optional<Rental> findActiveByCarId(Long carId) {
-		TypedQuery<Rental> query = entityManager
-				.createQuery("SELECT r FROM Rental r WHERE r.car.id = :carId AND (r.startDate + r.days day) > :"
-						+ TODAY_PARAM, Rental.class);
+	public boolean existsActiveByCarId(Long carId) {
+		TypedQuery<Long> query = entityManager
+				.createQuery("SELECT COUNT(r) FROM Rental r WHERE r.car.id = :carId AND (r.startDate + r.days day) > :"
+						+ TODAY_PARAM, Long.class);
 		query.setParameter("carId", carId);
 		query.setParameter(TODAY_PARAM, LocalDate.now(clock));
 
-		return query.getResultStream().findFirst();
+		return query.getSingleResult() > 0;
+	}
+
+	@Override
+	public boolean existsActiveByCustomerId(Long customerId) {
+		TypedQuery<Long> query = entityManager
+				.createQuery(
+						"SELECT COUNT(r) FROM Rental r WHERE r.customer.id = :customerId AND (r.startDate + r.days day) > :"
+								+ TODAY_PARAM,
+						Long.class);
+		query.setParameter("customerId", customerId);
+		query.setParameter(TODAY_PARAM, LocalDate.now(clock));
+
+		return query.getSingleResult() > 0;
 	}
 
 	@Override

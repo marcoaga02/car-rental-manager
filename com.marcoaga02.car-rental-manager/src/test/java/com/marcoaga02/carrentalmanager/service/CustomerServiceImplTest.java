@@ -29,11 +29,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.marcoaga02.carrentalmanager.exception.CustomerHasActiveRentalException;
 import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateTaxIdCodeException;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
 import com.marcoaga02.carrentalmanager.model.Customer;
 import com.marcoaga02.carrentalmanager.repository.CustomerRepository;
+import com.marcoaga02.carrentalmanager.repository.RentalRepository;
 import com.marcoaga02.carrentalmanager.transaction.TransactionCode;
 import com.marcoaga02.carrentalmanager.transaction.TransactionContext;
 import com.marcoaga02.carrentalmanager.transaction.TransactionManager;
@@ -50,6 +52,9 @@ class CustomerServiceImplTest {
 
 	@Mock
 	private CustomerRepository customerRepository;
+
+	@Mock
+	private RentalRepository rentalRepository;
 
 	@Mock
 	private CustomerMapper customerMapper;
@@ -83,10 +88,16 @@ class CustomerServiceImplTest {
 	}
 
 	// Required by the strict stubbing of MockitoExtension
-	private void stubTransaction() {
+	private CustomerServiceImplTest stubTransaction() {
 		when(transactionContext.customerRepository()).thenReturn(customerRepository);
 		when(transactionManager.doInTransaction(any()))
 				.thenAnswer(answer((TransactionCode<?> code) -> code.apply(transactionContext)));
+
+		return this;
+	}
+
+	private void withRentalRepository() {
+		when(transactionContext.rentalRepository()).thenReturn(rentalRepository);
 	}
 
 	@Nested
@@ -253,17 +264,19 @@ class CustomerServiceImplTest {
 
 		@Test
 		void testDeleteCustomerWhenIdIsValidDeleteTheCustomer() {
-			stubTransaction();
+			stubTransaction().withRentalRepository();
 
 			when(customerRepository.findActiveById(AN_ID)).thenReturn(Optional.of(customer));
+			when(rentalRepository.existsActiveByCustomerId(AN_ID)).thenReturn(false);
 			when(customerRepository.save(customer)).thenReturn(customer);
 
 			customerService.deleteCustomer(AN_ID);
 
 			ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
 
-			InOrder inOrder = inOrder(customerRepository);
+			InOrder inOrder = inOrder(customerRepository, rentalRepository);
 			inOrder.verify(customerRepository).findActiveById(AN_ID);
+			inOrder.verify(rentalRepository).existsActiveByCustomerId(AN_ID);
 			inOrder.verify(customerRepository).save(customerCaptor.capture());
 			inOrder.verifyNoMoreInteractions();
 
@@ -286,6 +299,23 @@ class CustomerServiceImplTest {
 
 			verify(customerRepository).findActiveById(ANOTHER_ID);
 			verifyNoMoreInteractions(customerRepository);
+			verifyNoInteractions(customerMapper, rentalRepository);
+		}
+
+		@Test
+		void testDeleteCustomerWhenIsCurrentlyRentedThrowCustomerHasActiveRentalException() {
+			stubTransaction().withRentalRepository();
+
+			when(customerRepository.findActiveById(AN_ID)).thenReturn(Optional.of(customer));
+			when(rentalRepository.existsActiveByCustomerId(AN_ID)).thenReturn(true);
+
+			assertThatThrownBy(() -> customerService.deleteCustomer(AN_ID))
+					.isInstanceOf(CustomerHasActiveRentalException.class)
+					.hasMessage("Customer with id '" + AN_ID + "' has an active rental and cannot be deleted");
+
+			verify(customerRepository).findActiveById(AN_ID);
+			verify(rentalRepository).existsActiveByCustomerId(AN_ID);
+			verifyNoMoreInteractions(customerRepository, rentalRepository);
 			verifyNoInteractions(customerMapper);
 		}
 
