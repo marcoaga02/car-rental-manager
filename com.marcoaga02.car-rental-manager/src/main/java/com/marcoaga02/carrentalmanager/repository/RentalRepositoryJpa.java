@@ -12,6 +12,8 @@ import jakarta.persistence.TypedQuery;
 
 public class RentalRepositoryJpa implements RentalRepository {
 
+	private static final String TODAY_PARAM = "today";
+
 	private final EntityManager entityManager;
 	private final Clock clock;
 
@@ -23,8 +25,8 @@ public class RentalRepositoryJpa implements RentalRepository {
 	@Override
 	public List<Rental> findAllActive() {
 		TypedQuery<Rental> query = entityManager
-				.createQuery("SELECT r FROM Rental r WHERE (r.startDate + r.days day) > :today", Rental.class);
-		query.setParameter("today", today());
+				.createQuery("SELECT r FROM Rental r WHERE (r.startDate + r.days day) > :" + TODAY_PARAM, Rental.class);
+		query.setParameter(TODAY_PARAM, LocalDate.now(clock));
 
 		return query.getResultList();
 	}
@@ -32,10 +34,10 @@ public class RentalRepositoryJpa implements RentalRepository {
 	@Override
 	public Optional<Rental> findActiveByCarId(Long carId) {
 		TypedQuery<Rental> query = entityManager
-				.createQuery("SELECT r FROM Rental r WHERE r.car.id = :carId AND (r.startDate + r.days day) > :today",
-						Rental.class);
+				.createQuery("SELECT r FROM Rental r WHERE r.car.id = :carId AND (r.startDate + r.days day) > :"
+						+ TODAY_PARAM, Rental.class);
 		query.setParameter("carId", carId);
-		query.setParameter("today", today());
+		query.setParameter(TODAY_PARAM, LocalDate.now(clock));
 
 		return query.getResultStream().findFirst();
 	}
@@ -43,10 +45,10 @@ public class RentalRepositoryJpa implements RentalRepository {
 	@Override
 	public Optional<Rental> findActiveById(Long id) {
 		TypedQuery<Rental> query = entityManager
-				.createQuery("SELECT r FROM Rental r WHERE r.id = :id AND (r.startDate + r.days day) > :today",
+				.createQuery("SELECT r FROM Rental r WHERE r.id = :id AND (r.startDate + r.days day) > :" + TODAY_PARAM,
 						Rental.class);
 		query.setParameter("id", id);
-		query.setParameter("today", today());
+		query.setParameter(TODAY_PARAM, LocalDate.now(clock));
 
 		return query.getResultStream().findFirst();
 	}
@@ -66,10 +68,6 @@ public class RentalRepositoryJpa implements RentalRepository {
 		Rental rental = entityManager.find(Rental.class, id);
 
 		entityManager.remove(rental);
-	}
-
-	private LocalDate today() {
-		return LocalDate.now(clock);
 	}
 
 }
