@@ -9,7 +9,7 @@ public interface RentalRepository {
 
 	List<Rental> findAllActive();
 
-	Optional<Rental> findActiveByCarId(Long carId);
+	boolean existsActiveByCarId(Long carId);
 
 	Optional<Rental> findActiveById(Long id);
 

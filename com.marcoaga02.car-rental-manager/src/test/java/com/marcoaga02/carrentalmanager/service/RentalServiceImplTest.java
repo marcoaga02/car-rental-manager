@@ -285,7 +285,7 @@ class RentalServiceImplTest {
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
-			when(rentalRepository.findActiveByCarId(A_CAR_ID)).thenReturn(Optional.empty());
+			when(rentalRepository.existsActiveByCarId(A_CAR_ID)).thenReturn(false);
 
 			Rental savedRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 			when(rentalRepository.save(any(Rental.class))).thenReturn(savedRental);
@@ -300,7 +300,7 @@ class RentalServiceImplTest {
 			InOrder inOrder = inOrder(carRepository, customerRepository, rentalRepository, rentalMapper);
 			inOrder.verify(carRepository).findActiveById(A_CAR_ID);
 			inOrder.verify(customerRepository).findActiveById(A_CUSTOMER_ID);
-			inOrder.verify(rentalRepository).findActiveByCarId(A_CAR_ID);
+			inOrder.verify(rentalRepository).existsActiveByCarId(A_CAR_ID);
 			inOrder.verify(rentalRepository).save(rentalCaptor.capture());
 			inOrder.verify(rentalMapper).toViewModel(savedRental);
 			inOrder.verifyNoMoreInteractions();
@@ -356,7 +356,7 @@ class RentalServiceImplTest {
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
-			when(rentalRepository.findActiveByCarId(A_CAR_ID)).thenReturn(Optional.of(rental));
+			when(rentalRepository.existsActiveByCarId(A_CAR_ID)).thenReturn(true);
 
 			assertThatThrownBy(() -> rentalService.createRental(request))
 					.isInstanceOf(CarAlreadyRentedException.class)
@@ -364,7 +364,7 @@ class RentalServiceImplTest {
 
 			verify(carRepository).findActiveById(A_CAR_ID);
 			verify(customerRepository).findActiveById(A_CUSTOMER_ID);
-			verify(rentalRepository).findActiveByCarId(A_CAR_ID);
+			verify(rentalRepository).existsActiveByCarId(A_CAR_ID);
 			verifyNoMoreInteractions(carRepository, customerRepository, rentalRepository);
 			verifyNoInteractions(rentalMapper);
 		}

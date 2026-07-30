@@ -35,7 +35,6 @@ import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
-import com.marcoaga02.carrentalmanager.model.Rental;
 import com.marcoaga02.carrentalmanager.repository.CarRepository;
 import com.marcoaga02.carrentalmanager.repository.RentalRepository;
 import com.marcoaga02.carrentalmanager.transaction.TransactionCode;
@@ -285,7 +284,7 @@ class CarServiceImplTest {
 			stubTransaction().withRentalRepository();
 
 			when(carRepository.findActiveById(AN_ID)).thenReturn(Optional.of(car));
-			when(rentalRepository.findActiveByCarId(AN_ID)).thenReturn(Optional.empty());
+			when(rentalRepository.existsActiveByCarId(AN_ID)).thenReturn(false);
 			when(carRepository.save(car)).thenReturn(car);
 
 			carService.deleteCar(AN_ID);
@@ -294,7 +293,7 @@ class CarServiceImplTest {
 
 			InOrder inOrder = inOrder(carRepository, rentalRepository);
 			inOrder.verify(carRepository).findActiveById(AN_ID);
-			inOrder.verify(rentalRepository).findActiveByCarId(AN_ID);
+			inOrder.verify(rentalRepository).existsActiveByCarId(AN_ID);
 			inOrder.verify(carRepository).save(carCaptor.capture());
 			inOrder.verifyNoMoreInteractions();
 
@@ -325,14 +324,14 @@ class CarServiceImplTest {
 			stubTransaction().withRentalRepository();
 
 			when(carRepository.findActiveById(AN_ID)).thenReturn(Optional.of(car));
-			when(rentalRepository.findActiveByCarId(AN_ID)).thenReturn(Optional.of(new Rental(car, null, null, null)));
+			when(rentalRepository.existsActiveByCarId(AN_ID)).thenReturn(true);
 
 			assertThatThrownBy(() -> carService.deleteCar(AN_ID))
 					.isInstanceOf(CarCurrentlyRentedException.class)
 					.hasMessage("Car with id '" + AN_ID + "' is currently rented and cannot be deleted");
 
 			verify(carRepository).findActiveById(AN_ID);
-			verify(rentalRepository).findActiveByCarId(AN_ID);
+			verify(rentalRepository).existsActiveByCarId(AN_ID);
 			verifyNoMoreInteractions(carRepository, rentalRepository);
 			verifyNoInteractions(carMapper);
 		}

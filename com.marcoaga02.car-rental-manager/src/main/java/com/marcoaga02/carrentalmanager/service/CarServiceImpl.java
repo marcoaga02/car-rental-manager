@@ -80,9 +80,10 @@ public class CarServiceImpl implements CarService {
 
 		transactionManager.doInTransaction(ctx -> {
 			Car car = ctx.carRepository().findActiveById(carId).orElseThrow(() -> new CarNotFoundException(carId));
-			ctx.rentalRepository().findActiveByCarId(carId).ifPresent(activeRental -> {
+
+			if (ctx.rentalRepository().existsActiveByCarId(carId)) {
 				throw new CarCurrentlyRentedException(carId);
-			});
+			}
 
 			car.setDeleted(true);
 			ctx.carRepository().save(car);
