@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 @Table(name = "customers")
 public class Customer extends BaseEntity {
 
-	@Column(nullable = false)
+	@Column(name = "tax_id_code", nullable = false)
 	private String taxIdCode;
 
 	@Column(nullable = false)
