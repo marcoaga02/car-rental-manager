@@ -62,6 +62,7 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 	}
 
+	// TODO aggiungere controllo di integrità sui noleggi attivi prima di cancellare un customer
 	@Override
 	public void deleteCustomer(Long customerId) {
 		if (customerId == null) {

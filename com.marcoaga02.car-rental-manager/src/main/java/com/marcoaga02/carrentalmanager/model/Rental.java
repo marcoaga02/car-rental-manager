@@ -20,10 +20,10 @@ public class Rental extends BaseEntity {
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
 
-	@Column(nullable = false)
+	@Column(name = "start_date", nullable = false)
 	private LocalDate startDate;
 
-	@Column(nullable = false)
+	@Column(name = "days", nullable = false)
 	private Integer days;
 
 	public Rental(Car car, Customer customer, LocalDate startDate, Integer days) {

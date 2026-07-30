@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 @Table(name = "cars")
 public class Car extends BaseEntity {
 
-	@Column(nullable = false)
+	@Column(name = "car_plate", nullable = false)
 	private String carPlate;
 
 	@Column(nullable = false)
@@ -19,7 +19,7 @@ public class Car extends BaseEntity {
 	@Column(nullable = false)
 	private String model;
 
-	@Column(nullable = false)
+	@Column(name = "daily_rate", nullable = false)
 	private BigDecimal dailyRate;
 
 	@Column(nullable = false)

@@ -71,6 +71,7 @@ public class CarServiceImpl implements CarService {
 		}
 	}
 
+	// TODO aggiungere controllo di integrità sui noleggi attivi prima di cancellare un customer
 	@Override
 	public void deleteCar(Long carId) {
 		if (carId == null) {
