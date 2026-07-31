@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.controller.swing;
+package com.marcoaga02.carrentalmanager.controller;
 
 import com.marcoaga02.carrentalmanager.exception.CarCurrentlyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;

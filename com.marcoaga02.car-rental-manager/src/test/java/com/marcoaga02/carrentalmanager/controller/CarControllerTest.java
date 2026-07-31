@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.controller.swing;
+package com.marcoaga02.carrentalmanager.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
