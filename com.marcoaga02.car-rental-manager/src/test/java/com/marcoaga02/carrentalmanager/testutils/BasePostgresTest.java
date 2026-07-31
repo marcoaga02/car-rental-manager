@@ -23,7 +23,7 @@ public abstract class BasePostgresTest {
 			.withUsername("test")
 			.withPassword("test");
 
-	private EntityManagerFactory entityManagerFactory;
+	protected EntityManagerFactory entityManagerFactory;
 
 	protected EntityManager entityManager;
 
