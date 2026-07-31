@@ -6,6 +6,6 @@ import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
 public interface CustomerView extends BaseView {
 
-	void showAllCustomers(List<CustomerViewModel> cars);
+	void showAllCustomers(List<CustomerViewModel> customers);
 
 }
