@@ -33,6 +33,13 @@ public interface RentalService {
 	 */
 	RentalViewModel createRental(RentalCreationRequest request);
 
+	/**
+	 * Deletes the rental with the given id.
+	 *
+	 * @param rentalId the id of the rental to delete; must not be {@code null}
+	 * @throws IllegalArgumentException if {@code rentalId} is {@code null}
+	 * @throws RentalNotFoundException if no active rental exists with the given id
+	 */
 	void deleteRental(Long rentalId);
 
 }

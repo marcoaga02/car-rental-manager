@@ -124,7 +124,7 @@ class CustomerControllerTest {
 
 		@Test
 		void testCreateCustomerWhenInvalidInputShowsErrorAndDoesNotRefreshList() {
-			CustomerViewModel request = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			CustomerViewModel request = new CustomerViewModel(AN_ID, null, A_FIRSTNAME, A_LASTNAME);
 			IllegalArgumentException exception = new IllegalArgumentException("taxIdCode must not be blank");
 			doThrow(exception).when(customerService).createCustomer(request);
 
