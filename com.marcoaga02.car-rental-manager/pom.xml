@@ -168,10 +168,12 @@
             <targetClasses>
               <param>com.marcoaga02.carrentalmanager.mapper.*</param>
               <param>com.marcoaga02.carrentalmanager.service.*</param>
+              <param>com.marcoaga02.carrentalmanager.controller.*</param>
             </targetClasses>
             <targetTests>
               <param>com.marcoaga02.carrentalmanager.mapper.*</param>
               <param>com.marcoaga02.carrentalmanager.service.*</param>
+              <param>com.marcoaga02.carrentalmanager.controller.*</param>
             </targetTests>
             <mutators>
               <mutator>DEFAULTS</mutator>
