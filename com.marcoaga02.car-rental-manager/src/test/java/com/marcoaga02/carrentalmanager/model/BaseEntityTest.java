@@ -43,6 +43,7 @@ class BaseEntityTest {
 		assertThat(entity.equals(null)).isFalse();
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	void testEqualsWhenObjectIsNotABaseEntityReturnFalse() {
 		assertThat(entity.equals(A_STRING)).isFalse();

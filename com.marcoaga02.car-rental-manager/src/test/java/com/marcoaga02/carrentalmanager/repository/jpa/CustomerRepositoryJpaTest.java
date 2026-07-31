@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.repository;
+package com.marcoaga02.carrentalmanager.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.marcoaga02.carrentalmanager.model.Customer;
+import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 
-class CustomerRepositoryJpaTest extends BaseRepositoryTest {
+class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 	private static final Long AN_ID = 10L;
 

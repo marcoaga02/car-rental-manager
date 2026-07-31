@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.repository;
+package com.marcoaga02.carrentalmanager.testutils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 @Testcontainers
-public abstract class BaseRepositoryTest {
+public abstract class BasePostgresTest {
 
 	@SuppressWarnings("resource")
 	@Container
@@ -23,7 +23,7 @@ public abstract class BaseRepositoryTest {
 			.withUsername("test")
 			.withPassword("test");
 
-	private EntityManagerFactory entityManagerFactory;
+	protected EntityManagerFactory entityManagerFactory;
 
 	protected EntityManager entityManager;
 

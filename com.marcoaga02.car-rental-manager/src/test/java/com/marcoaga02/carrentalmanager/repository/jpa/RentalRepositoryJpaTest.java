@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.repository;
+package com.marcoaga02.carrentalmanager.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,8 +16,9 @@ import org.junit.jupiter.api.Test;
 import com.marcoaga02.carrentalmanager.model.Car;
 import com.marcoaga02.carrentalmanager.model.Customer;
 import com.marcoaga02.carrentalmanager.model.Rental;
+import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 
-class RentalRepositoryJpaTest extends BaseRepositoryTest {
+class RentalRepositoryJpaTest extends BasePostgresTest {
 
 	private static final Long A_CAR_ID = 1L;
 	private static final String A_CAR_PLATE = "aCarPlate";

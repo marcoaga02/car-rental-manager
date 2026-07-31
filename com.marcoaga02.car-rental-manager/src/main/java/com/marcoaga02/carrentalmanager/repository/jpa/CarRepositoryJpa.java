@@ -1,9 +1,10 @@
-package com.marcoaga02.carrentalmanager.repository;
+package com.marcoaga02.carrentalmanager.repository.jpa;
 
 import java.util.List;
 import java.util.Optional;
 
 import com.marcoaga02.carrentalmanager.model.Car;
+import com.marcoaga02.carrentalmanager.repository.CarRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

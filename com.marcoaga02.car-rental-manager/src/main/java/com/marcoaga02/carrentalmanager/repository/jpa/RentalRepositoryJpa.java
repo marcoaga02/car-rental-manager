@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.repository;
+package com.marcoaga02.carrentalmanager.repository.jpa;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.marcoaga02.carrentalmanager.model.Rental;
+import com.marcoaga02.carrentalmanager.repository.RentalRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
