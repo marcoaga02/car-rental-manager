@@ -19,11 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.marcoaga02.carrentalmanager.controller.CarView;
 import com.marcoaga02.carrentalmanager.exception.CarCurrentlyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.service.CarService;
+import com.marcoaga02.carrentalmanager.view.CarView;
 import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
 @ExtendWith(MockitoExtension.class)

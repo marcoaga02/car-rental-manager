@@ -1,4 +1,4 @@
-package com.marcoaga02.carrentalmanager.controller;
+package com.marcoaga02.carrentalmanager.view;
 
 import java.util.List;
 
