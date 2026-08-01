@@ -16,7 +16,9 @@
     <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
 
     <junit.jupiter.version>5.14.4</junit.jupiter.version>
+    <junit.4.version>4.13.2</junit.4.version>
     <assertj.version>3.27.7</assertj.version>
+    <assertj.swing.version>3.17.1</assertj.swing.version>
     <jacoco.version>0.8.15</jacoco.version>
     <pitest.version>1.25.7</pitest.version>
     <coveralls.version>5.1.0</coveralls.version>
@@ -26,12 +28,13 @@
     <testcontainers.version>1.21.4</testcontainers.version>
     <hibernate.version>6.6.54.Final</hibernate.version>
     <postgres.version>42.7.13</postgres.version>
+    <picocli.version>4.7.7</picocli.version>
 
     <commons.lang3.version>3.20.0</commons.lang3.version>
     <pitest.junit5.plugin.version>1.2.3</pitest.junit5.plugin.version>
 
     <sonar.coverage.exclusions>
-      **/model/Car.java,**/model/Customer.java,**/model/Rental.java,**/viewmodel/*.*</sonar.coverage.exclusions>
+      **/model/Car.java,**/model/Customer.java,**/model/Rental.java,**/viewmodel/*.*, **/main/*.*</sonar.coverage.exclusions>
     <sonar.cpd.exclusions>**/model/**,**/viewmodel/**</sonar.cpd.exclusions>
 
     <sonar.tests>
@@ -41,6 +44,11 @@
     <sonar.junit.reportPaths>
       ${project.build.directory}/surefire-reports
     </sonar.junit.reportPaths>
+
+    <!-- At least one assertion (GUI tests) -->
+    <sonar.issue.ignore.multicriteria.e15.ruleKey>
+      java:S2699
+    </sonar.issue.ignore.multicriteria.e15.ruleKey>
   </properties>
 
   <dependencies>
@@ -64,6 +72,11 @@
       <artifactId>postgresql</artifactId>
       <version>${postgres.version}</version>
     </dependency>
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>${picocli.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -72,9 +85,27 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.4.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-swing-junit</artifactId>
+      <version>${assertj.swing.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -122,6 +153,7 @@
               <exclude>**/model/Customer.class</exclude>
               <exclude>**/model/Rental.class</exclude>
               <exclude>**/viewmodel/*.*</exclude>
+              <exclude>**/main/*.*</exclude>
             </excludes>
           </configuration>
           <executions>
