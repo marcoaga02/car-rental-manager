@@ -123,6 +123,7 @@ class RentalControllerTest {
 
 			InOrder inOrder = inOrder(rentalService, rentalView);
 			inOrder.verify(rentalService).createRental(request);
+			inOrder.verify(rentalView).clearFields();
 			inOrder.verify(rentalService).getAllActiveRentals();
 			inOrder.verify(rentalView).showAllRentals(List.of(rental));
 			inOrder.verifyNoMoreInteractions();
@@ -138,6 +139,7 @@ class RentalControllerTest {
 
 			verify(rentalService).createRental(request);
 			verify(rentalView).showError(exception.getMessage());
+			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
 		}
@@ -152,6 +154,7 @@ class RentalControllerTest {
 
 			verify(rentalService).createRental(request);
 			verify(rentalView).showError(exception.getMessage());
+			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
 		}
@@ -166,6 +169,7 @@ class RentalControllerTest {
 
 			verify(rentalService).createRental(request);
 			verify(rentalView).showError(exception.getMessage());
+			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
 		}
@@ -180,6 +184,7 @@ class RentalControllerTest {
 
 			verify(rentalService).createRental(request);
 			verify(rentalView).showError(exception.getMessage());
+			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
 		}

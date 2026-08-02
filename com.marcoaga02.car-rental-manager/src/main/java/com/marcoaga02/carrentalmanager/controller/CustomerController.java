@@ -25,6 +25,7 @@ public class CustomerController {
 	public void createCustomer(CustomerViewModel request) {
 		try {
 			customerService.createCustomer(request);
+			customerView.clearFields();
 			this.getAllCustomers();
 		} catch (IllegalArgumentException | DuplicateTaxIdCodeException e) {
 			customerView.showError(e.getMessage());

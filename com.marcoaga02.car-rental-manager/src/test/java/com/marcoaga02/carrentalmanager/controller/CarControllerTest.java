@@ -107,6 +107,7 @@ class CarControllerTest {
 
 			InOrder inOrder = inOrder(carService, carView);
 			inOrder.verify(carService).createCar(request);
+			inOrder.verify(carView).clearFields();
 			inOrder.verify(carService).getAllCars();
 			inOrder.verify(carView).showAllCars(List.of(request));
 			inOrder.verifyNoMoreInteractions();
@@ -122,6 +123,7 @@ class CarControllerTest {
 
 			verify(carService).createCar(request);
 			verify(carView).showError(exception.getMessage());
+			verify(carView, never()).clearFields();
 			verify(carService, never()).getAllCars();
 			verify(carView, never()).showAllCars(any());
 		}
@@ -136,6 +138,7 @@ class CarControllerTest {
 
 			verify(carService).createCar(request);
 			verify(carView).showError(exception.getMessage());
+			verify(carView, never()).clearFields();
 			verify(carService, never()).getAllCars();
 			verify(carView, never()).showAllCars(any());
 		}

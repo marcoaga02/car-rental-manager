@@ -26,11 +26,8 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public List<CustomerViewModel> getAllCustomers() {
-		return transactionManager
-				.doInTransaction(ctx -> ctx.customerRepository().findAllActive())
-				.stream()
-				.map(customerMapper::toViewModel)
-				.collect(Collectors.toList());
+		return transactionManager.doInTransaction(ctx -> ctx.customerRepository().findAllActive()).stream()
+				.map(customerMapper::toViewModel).collect(Collectors.toList());
 	}
 
 	@Override
@@ -70,9 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 
 		transactionManager.doInTransaction(ctx -> {
-			Customer customer = ctx
-					.customerRepository()
-					.findActiveById(customerId)
+			Customer customer = ctx.customerRepository().findActiveById(customerId)
 					.orElseThrow(() -> new CustomerNotFoundException(customerId));
 
 			if (ctx.rentalRepository().existsActiveByCustomerId(customerId)) {

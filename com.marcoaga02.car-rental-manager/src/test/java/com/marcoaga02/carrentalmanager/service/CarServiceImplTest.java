@@ -147,11 +147,8 @@ class CarServiceImplTest {
 			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
 			when(carMapper.toViewModel(anotherCar)).thenReturn(anotherCarViewModel);
 
-			List<CarViewModel> result = carService
-					.getAllCars()
-					.stream()
-					.sorted(Comparator.comparing(CarViewModel::getId))
-					.collect(Collectors.toList());
+			List<CarViewModel> result = carService.getAllCars().stream()
+					.sorted(Comparator.comparing(CarViewModel::getId)).collect(Collectors.toList());
 
 			assertThat(result).hasSize(2).containsExactlyInAnyOrder(carViewModel, anotherCarViewModel);
 
@@ -169,8 +166,7 @@ class CarServiceImplTest {
 		class InputValidation {
 			@Test
 			void testCreateCarWhenTheInputIsNullThrowIllegalArgumentException() {
-				assertThatThrownBy(() -> carService.createCar(null))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(null)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("carViewModel must not be null");
 			}
 
@@ -180,8 +176,7 @@ class CarServiceImplTest {
 			void testCreateCarWhenCarPlateIsNullOrBlankThrowIllegalArgumentException(String invalidPlate) {
 				CarViewModel invalidCar = new CarViewModel(AN_ID, invalidPlate, A_BRAND, A_MODEL, A_DAILY_RATE);
 
-				assertThatThrownBy(() -> carService.createCar(invalidCar))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(invalidCar)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("carPlate must not be blank");
 			}
 
@@ -191,8 +186,7 @@ class CarServiceImplTest {
 			void testCreateCarWhenBrandIsNullOrBlankThrowIllegalArgumentException(String invalidBrand) {
 				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, invalidBrand, A_MODEL, A_DAILY_RATE);
 
-				assertThatThrownBy(() -> carService.createCar(invalidCar))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(invalidCar)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("brand must not be blank");
 			}
 
@@ -202,16 +196,14 @@ class CarServiceImplTest {
 			void testCreateCarWhenModelIsNullOrBlankThrowIllegalArgumentException(String invalidModel) {
 				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, invalidModel, A_DAILY_RATE);
 
-				assertThatThrownBy(() -> carService.createCar(invalidCar))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(invalidCar)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("model must not be blank");
 			}
 
 			@Test
 			void testCreateCarWhenDailyRateIsNullThrowIllegalArgumentException() {
 				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, null);
-				assertThatThrownBy(() -> carService.createCar(invalidCar))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(invalidCar)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("dailyRate must not be null");
 			}
 
@@ -221,8 +213,7 @@ class CarServiceImplTest {
 				CarViewModel invalidCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL,
 						BigDecimal.valueOf(invalidRate));
 
-				assertThatThrownBy(() -> carService.createCar(invalidCar))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> carService.createCar(invalidCar)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("dailyRate must be positive");
 			}
 		}
@@ -274,8 +265,7 @@ class CarServiceImplTest {
 
 		@Test
 		void testDeleteCarWhenInputIsNullThrowIllegalArgumentException() {
-			assertThatThrownBy(() -> carService.deleteCar(null))
-					.isInstanceOf(IllegalArgumentException.class)
+			assertThatThrownBy(() -> carService.deleteCar(null)).isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("carId must not be null");
 		}
 
@@ -310,8 +300,7 @@ class CarServiceImplTest {
 
 			when(carRepository.findActiveById(ANOTHER_ID)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> carService.deleteCar(ANOTHER_ID))
-					.isInstanceOf(CarNotFoundException.class)
+			assertThatThrownBy(() -> carService.deleteCar(ANOTHER_ID)).isInstanceOf(CarNotFoundException.class)
 					.hasMessage("Car with id '" + ANOTHER_ID + "' not found");
 
 			verify(carRepository).findActiveById(ANOTHER_ID);
@@ -326,8 +315,7 @@ class CarServiceImplTest {
 			when(carRepository.findActiveById(AN_ID)).thenReturn(Optional.of(car));
 			when(rentalRepository.existsActiveByCarId(AN_ID)).thenReturn(true);
 
-			assertThatThrownBy(() -> carService.deleteCar(AN_ID))
-					.isInstanceOf(CarCurrentlyRentedException.class)
+			assertThatThrownBy(() -> carService.deleteCar(AN_ID)).isInstanceOf(CarCurrentlyRentedException.class)
 					.hasMessage("Car with id '" + AN_ID + "' is currently rented and cannot be deleted");
 
 			verify(carRepository).findActiveById(AN_ID);

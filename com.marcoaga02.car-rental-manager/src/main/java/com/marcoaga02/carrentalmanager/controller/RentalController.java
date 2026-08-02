@@ -26,6 +26,7 @@ public class RentalController {
 	public void createRental(RentalCreationRequest request) {
 		try {
 			rentalService.createRental(request);
+			rentalView.clearFields();
 			this.getAllActiveRentals();
 		} catch (IllegalArgumentException | CarNotFoundException | CustomerNotFoundException
 				| CarAlreadyRentedException e) {

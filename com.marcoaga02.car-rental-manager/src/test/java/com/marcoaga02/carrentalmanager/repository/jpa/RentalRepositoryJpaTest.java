@@ -357,8 +357,7 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 			Rental result = rentalRepository.save(rental);
 			entityManager.getTransaction().commit();
 
-			assertThat(result)
-					.extracting(Rental::getId, Rental::getStartDate, Rental::getDays)
+			assertThat(result).extracting(Rental::getId, Rental::getStartDate, Rental::getDays)
 					.containsExactly(rental.getId(), A_START_DATE, A_NUMBER_OF_DAYS);
 
 			assertThat(result.getCar())

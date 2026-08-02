@@ -7,5 +7,5 @@ import com.marcoaga02.carrentalmanager.viewmodel.RentalViewModel;
 public interface RentalView extends BaseView {
 
 	void showAllRentals(List<RentalViewModel> rentals);
-	
+
 }
