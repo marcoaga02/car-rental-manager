@@ -209,11 +209,8 @@ class RentalServiceImplTest {
 			when(rentalMapper.toViewModel(rental)).thenReturn(rentalViewModel);
 			when(rentalMapper.toViewModel(anotherRental)).thenReturn(anotherRentalViewModel);
 
-			List<RentalViewModel> result = rentalService
-					.getAllActiveRentals()
-					.stream()
-					.sorted(Comparator.comparing(RentalViewModel::getId))
-					.collect(Collectors.toList());
+			List<RentalViewModel> result = rentalService.getAllActiveRentals().stream()
+					.sorted(Comparator.comparing(RentalViewModel::getId)).collect(Collectors.toList());
 
 			assertThat(result).hasSize(2).containsExactlyInAnyOrder(rentalViewModel, anotherRentalViewModel);
 
@@ -233,8 +230,7 @@ class RentalServiceImplTest {
 
 			@Test
 			void testCreateRentalWhenTheInputIsNullThrowIllegalArgumentException() {
-				assertThatThrownBy(() -> rentalService.createRental(null))
-						.isInstanceOf(IllegalArgumentException.class)
+				assertThatThrownBy(() -> rentalService.createRental(null)).isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("request must not be null");
 			}
 
@@ -243,8 +239,7 @@ class RentalServiceImplTest {
 				RentalCreationRequest illegalRequest = new RentalCreationRequest(null, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("carId must not be null");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("carId must not be null");
 			}
 
 			@Test
@@ -252,8 +247,7 @@ class RentalServiceImplTest {
 				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, null, A_NUMBER_OF_DAYS);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("customerId must not be null");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("customerId must not be null");
 			}
 
 			@Test
@@ -261,8 +255,7 @@ class RentalServiceImplTest {
 				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, null);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("days must not be null");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("days must not be null");
 			}
 
 			@ParameterizedTest
@@ -271,8 +264,7 @@ class RentalServiceImplTest {
 				RentalCreationRequest illegalRequest = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, invalidDays);
 
 				assertThatThrownBy(() -> rentalService.createRental(illegalRequest))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("days must be a positive integer");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("days must be a positive integer");
 			}
 
 		}
@@ -320,8 +312,7 @@ class RentalServiceImplTest {
 
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> rentalService.createRental(request))
-					.isInstanceOf(CarNotFoundException.class)
+			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CarNotFoundException.class)
 					.hasMessage("Car with id '" + A_CAR_ID + "' not found");
 
 			verify(carRepository).findActiveById(A_CAR_ID);
@@ -338,8 +329,7 @@ class RentalServiceImplTest {
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> rentalService.createRental(request))
-					.isInstanceOf(CustomerNotFoundException.class)
+			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CustomerNotFoundException.class)
 					.hasMessage("Customer with id '" + A_CUSTOMER_ID + "' not found");
 
 			verify(carRepository).findActiveById(A_CAR_ID);
@@ -358,8 +348,7 @@ class RentalServiceImplTest {
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
 			when(rentalRepository.existsActiveByCarId(A_CAR_ID)).thenReturn(true);
 
-			assertThatThrownBy(() -> rentalService.createRental(request))
-					.isInstanceOf(CarAlreadyRentedException.class)
+			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CarAlreadyRentedException.class)
 					.hasMessage("Car with id '" + A_CAR_ID + "' is already rented");
 
 			verify(carRepository).findActiveById(A_CAR_ID);
@@ -376,8 +365,7 @@ class RentalServiceImplTest {
 
 		@Test
 		void testDeleteRentalWhenInputIsNullThrowIllegalArgumentException() {
-			assertThatThrownBy(() -> rentalService.deleteRental(null))
-					.isInstanceOf(IllegalArgumentException.class)
+			assertThatThrownBy(() -> rentalService.deleteRental(null)).isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("rentalId must not be null");
 		}
 

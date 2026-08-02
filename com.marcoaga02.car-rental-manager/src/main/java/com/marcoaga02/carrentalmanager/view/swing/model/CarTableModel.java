@@ -39,10 +39,10 @@ public class CarTableModel extends AbstractTableModel {
 		if (rowIndex >= cars.size()) {
 			throw new IllegalArgumentException("Invalid row: " + rowIndex);
 		}
-		
-	    return cars.get(rowIndex);
+
+		return cars.get(rowIndex);
 	}
-	
+
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		CarViewModel car = getCarAt(rowIndex);

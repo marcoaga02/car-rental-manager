@@ -19,17 +19,16 @@ public class CustomerRepositoryJpa implements CustomerRepository {
 
 	@Override
 	public List<Customer> findAllActive() {
-		TypedQuery<Customer> query = entityManager
-				.createQuery("SELECT c FROM Customer c WHERE c.deleted = false", Customer.class);
+		TypedQuery<Customer> query = entityManager.createQuery("SELECT c FROM Customer c WHERE c.deleted = false",
+				Customer.class);
 
 		return query.getResultList();
 	}
 
 	@Override
 	public Optional<Customer> findActiveByTaxIdCode(String taxIdCode) {
-		TypedQuery<Customer> query = entityManager
-				.createQuery("SELECT c FROM Customer c WHERE c.taxIdCode = :taxIdCode AND c.deleted = false",
-						Customer.class);
+		TypedQuery<Customer> query = entityManager.createQuery(
+				"SELECT c FROM Customer c WHERE c.taxIdCode = :taxIdCode AND c.deleted = false", Customer.class);
 		query.setParameter("taxIdCode", taxIdCode);
 
 		return query.getResultStream().findFirst();

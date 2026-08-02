@@ -33,11 +33,8 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public List<RentalViewModel> getAllActiveRentals() {
-		return transactionManager
-				.doInTransaction(ctx -> ctx.rentalRepository().findAllActive())
-				.stream()
-				.map(rentalMapper::toViewModel)
-				.collect(Collectors.toList());
+		return transactionManager.doInTransaction(ctx -> ctx.rentalRepository().findAllActive()).stream()
+				.map(rentalMapper::toViewModel).collect(Collectors.toList());
 	}
 
 	@Override
@@ -49,9 +46,7 @@ public class RentalServiceImpl implements RentalService {
 			Car car = ctx.carRepository().findActiveById(carId).orElseThrow(() -> new CarNotFoundException(carId));
 
 			final Long customerId = request.getCustomerId();
-			Customer customer = ctx
-					.customerRepository()
-					.findActiveById(customerId)
+			Customer customer = ctx.customerRepository().findActiveById(customerId)
 					.orElseThrow(() -> new CustomerNotFoundException(customerId));
 
 			if (ctx.rentalRepository().existsActiveByCarId(carId)) {

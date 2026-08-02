@@ -143,11 +143,8 @@ class CustomerServiceImplTest {
 			when(customerMapper.toViewModel(customer)).thenReturn(customerViewModel);
 			when(customerMapper.toViewModel(anotherCustomer)).thenReturn(anotherCustomerViewModel);
 
-			List<CustomerViewModel> result = customerService
-					.getAllCustomers()
-					.stream()
-					.sorted(Comparator.comparing(CustomerViewModel::getId))
-					.collect(Collectors.toList());
+			List<CustomerViewModel> result = customerService.getAllCustomers().stream()
+					.sorted(Comparator.comparing(CustomerViewModel::getId)).collect(Collectors.toList());
 
 			assertThat(result).hasSize(2).containsExactlyInAnyOrder(customerViewModel, anotherCustomerViewModel);
 
@@ -168,8 +165,7 @@ class CustomerServiceImplTest {
 			@Test
 			void testCreateCustomerWhenTheInputIsNullThrowIllegalArgumentException() {
 				assertThatThrownBy(() -> customerService.createCustomer(null))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("customerViewModel must not be null");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("customerViewModel must not be null");
 			}
 
 			@ParameterizedTest
@@ -180,8 +176,7 @@ class CustomerServiceImplTest {
 						A_LASTNAME);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("taxIdCode must not be blank");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("taxIdCode must not be blank");
 			}
 
 			@ParameterizedTest
@@ -192,8 +187,7 @@ class CustomerServiceImplTest {
 						A_LASTNAME);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("firstname must not be blank");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("firstname must not be blank");
 			}
 
 			@ParameterizedTest
@@ -204,8 +198,7 @@ class CustomerServiceImplTest {
 						invalidLastname);
 
 				assertThatThrownBy(() -> customerService.createCustomer(invalidCustomer))
-						.isInstanceOf(IllegalArgumentException.class)
-						.hasMessage("lastname must not be blank");
+						.isInstanceOf(IllegalArgumentException.class).hasMessage("lastname must not be blank");
 			}
 
 		}
@@ -257,8 +250,7 @@ class CustomerServiceImplTest {
 
 		@Test
 		void testDeleteCustomerWhenInputIsNullThrowIllegalArgumentException() {
-			assertThatThrownBy(() -> customerService.deleteCustomer(null))
-					.isInstanceOf(IllegalArgumentException.class)
+			assertThatThrownBy(() -> customerService.deleteCustomer(null)).isInstanceOf(IllegalArgumentException.class)
 					.hasMessage("customerId must not be null");
 		}
 

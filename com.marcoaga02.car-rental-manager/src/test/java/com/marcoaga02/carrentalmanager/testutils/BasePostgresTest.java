@@ -19,9 +19,7 @@ public abstract class BasePostgresTest {
 	@SuppressWarnings("resource")
 	@Container
 	private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.4")
-			.withDatabaseName("carrental_test")
-			.withUsername("test")
-			.withPassword("test");
+			.withDatabaseName("carrental_test").withUsername("test").withPassword("test");
 
 	protected EntityManagerFactory entityManagerFactory;
 

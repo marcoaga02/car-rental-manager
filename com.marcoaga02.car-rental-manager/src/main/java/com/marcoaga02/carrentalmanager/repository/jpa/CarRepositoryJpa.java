@@ -35,8 +35,8 @@ public class CarRepositoryJpa implements CarRepository {
 
 	@Override
 	public Optional<Car> findActiveById(Long id) {
-		TypedQuery<Car> query = entityManager
-				.createQuery("SELECT c FROM Car c WHERE c.id = :id AND c.deleted = false", Car.class);
+		TypedQuery<Car> query = entityManager.createQuery("SELECT c FROM Car c WHERE c.id = :id AND c.deleted = false",
+				Car.class);
 		query.setParameter("id", id);
 
 		return query.getResultStream().findFirst();
