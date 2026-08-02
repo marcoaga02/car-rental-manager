@@ -25,6 +25,7 @@ public class CarController {
 	public void createCar(CarViewModel request) {
 		try {
 			carService.createCar(request);
+			carView.clearFields();
 			this.getAllCars();
 		} catch (IllegalArgumentException | DuplicateCarPlateException e) {
 			carView.showError(e.getMessage());
