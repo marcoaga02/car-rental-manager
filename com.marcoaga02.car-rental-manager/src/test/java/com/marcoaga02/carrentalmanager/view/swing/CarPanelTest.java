@@ -242,7 +242,7 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 		window.table(CAR_TABLE).selectRows(0);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).requireEnabled();
 	}
-	
+
 	@Test
 	@GUITest
 	public void testClearFieldsShouldResetAllFieldsAndDisableAddCarButton() {
@@ -281,6 +281,7 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
 
 		window.table(CAR_TABLE).selectRows(0);
+		robot().waitForIdle();
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
 		verify(carController).deleteCar(AN_ID);
