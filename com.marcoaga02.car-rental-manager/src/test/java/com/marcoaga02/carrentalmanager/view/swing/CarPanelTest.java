@@ -1,6 +1,7 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.swing.fixture.Containers.showInFrame;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -9,9 +10,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.core.matcher.JLabelMatcher;
@@ -19,9 +17,6 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
-import org.assertj.swing.timing.Condition;
-import org.assertj.swing.timing.Pause;
-import static org.assertj.swing.timing.Timeout.timeout;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -69,24 +64,17 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Override
 	protected void onSetUp() throws Exception {
 		closeable = MockitoAnnotations.openMocks(this);
-		window = new FrameFixture(robot(), GuiActionRunner.execute(() -> {
-			carPanel = new CarPanel();
-			carPanel.setCarController(carController);
-			return wrapInFrame(carPanel);
-		}));
-
-		window.show();
+		carPanel = GuiActionRunner.execute(() -> {
+			CarPanel panel = new CarPanel();
+			panel.setCarController(carController);
+			return panel;
+		});
+		window = showInFrame(robot(), carPanel);
 	}
 
 	@Override
 	protected void onTearDown() throws Exception {
 		closeable.close();
-	}
-
-	private JFrame wrapInFrame(JPanel panel) {
-		JFrame frame = new JFrame();
-		frame.add(panel);
-		return frame;
 	}
 
 	@Test
@@ -245,7 +233,7 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 		window.table(CAR_TABLE).selectRows(0);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).requireEnabled();
 	}
-	
+
 	@Test
 	@GUITest
 	public void testClearFieldsShouldResetAllFieldsAndDisableAddCarButton() {
@@ -284,14 +272,6 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
 
 		window.table(CAR_TABLE).selectRows(0);
-		
-		Pause.pause(new Condition("delete button enabled") {
-	        @Override
-	        public boolean test() {
-	            return window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).target().isEnabled();
-	        }
-	    }, timeout(5000));
-		
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
 		verify(carController).deleteCar(AN_ID);
