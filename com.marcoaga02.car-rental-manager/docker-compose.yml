@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:18.4
+    container_name: carrentalmanager-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-carrentalmanager}
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - carrentalmanager-data:/var/lib/postgresql
+
+volumes:
+  carrentalmanager-data:

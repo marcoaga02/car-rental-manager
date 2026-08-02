@@ -29,11 +29,13 @@ import com.marcoaga02.carrentalmanager.view.CarView;
 import com.marcoaga02.carrentalmanager.view.swing.model.CarTableModel;
 import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
-public class CarPanel extends JPanel implements CarView {
+public class CarPanel extends JPanel implements CarView, ActivablePanel {
+
+	private static final String DIALOG_FONT = "Dialog";
 
 	private static final long serialVersionUID = 1L;
 
-	private CarController carController;
+	private transient CarController carController;
 
 	private JTable carTable;
 	private CarTableModel carTableModel;
@@ -76,18 +78,13 @@ public class CarPanel extends JPanel implements CarView {
 		carTable.getTableHeader().setBackground(Color.LIGHT_GRAY);
 		carTable.getTableHeader().setForeground(Color.BLACK);
 		leftPanel.setLayout(new BorderLayout(0, 0));
-		// TODO rimuovere questi dati
-		carTableModel.setCars(List.of(
-				new CarViewModel(1L, "BB555BB", "MAZDA", "Mazda3", BigDecimal.valueOf(123.3)),
-				new CarViewModel(2L, "AF888PL", "AUDI", "A3", BigDecimal.valueOf(47.5))
-				));
 
 		carTable.getSelectionModel().addListSelectionListener(e -> {
-		    if (!e.getValueIsAdjusting()) {
-		        updateDeleteCarButtonState();
-		    }
+			if (!e.getValueIsAdjusting()) {
+				updateDeleteCarButtonState();
+			}
 		});
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		leftPanel.add(scrollPane);
 		scrollPane.setViewportView(carTable);
@@ -105,10 +102,9 @@ public class CarPanel extends JPanel implements CarView {
 		deleteCarButton = new JButton("Delete selected");
 		deleteCarButton.setEnabled(false);
 		footerPanel.add(deleteCarButton, BorderLayout.EAST);
-		deleteCarButton.addActionListener(e ->
-			carController.deleteCar(carTableModel.getCarAt(carTable.getSelectedRow()).getId())
-		);
-		
+		deleteCarButton.addActionListener(
+				e -> carController.deleteCar(carTableModel.getCarAt(carTable.getSelectedRow()).getId()));
+
 		rightPanel = new JPanel();
 		rightPanel.setBorder(new LineBorder(Color.GRAY));
 		add(rightPanel, BorderLayout.EAST);
@@ -125,7 +121,7 @@ public class CarPanel extends JPanel implements CarView {
 		fieldPanel.setLayout(gbl_fieldPanel);
 
 		carPlateLabel = new JLabel("Car plate");
-		carPlateLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		carPlateLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		carPlateLabel.setForeground(Color.DARK_GRAY);
 		GridBagConstraints gbc_lblCarPlate = new GridBagConstraints();
 		gbc_lblCarPlate.gridwidth = 1;
@@ -148,7 +144,7 @@ public class CarPanel extends JPanel implements CarView {
 
 		brandLabel = new JLabel("Brand");
 		brandLabel.setForeground(Color.DARK_GRAY);
-		brandLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		brandLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		GridBagConstraints gbc_lblBrand = new GridBagConstraints();
 		gbc_lblBrand.gridwidth = 1;
 		gbc_lblBrand.anchor = GridBagConstraints.WEST;
@@ -169,7 +165,7 @@ public class CarPanel extends JPanel implements CarView {
 		brandTextField.setColumns(15);
 
 		modelLabel = new JLabel("Model");
-		modelLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		modelLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		modelLabel.setForeground(Color.DARK_GRAY);
 		GridBagConstraints gbc_lblModel = new GridBagConstraints();
 		gbc_lblModel.anchor = GridBagConstraints.WEST;
@@ -191,7 +187,7 @@ public class CarPanel extends JPanel implements CarView {
 
 		dailyRateLabel = new JLabel("Daily rate (€)");
 		dailyRateLabel.setForeground(Color.DARK_GRAY);
-		dailyRateLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		dailyRateLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		GridBagConstraints gbc_lblDailyRate = new GridBagConstraints();
 		gbc_lblDailyRate.anchor = GridBagConstraints.WEST;
 		gbc_lblDailyRate.gridwidth = 1;
@@ -242,13 +238,9 @@ public class CarPanel extends JPanel implements CarView {
 		modelTextField.addKeyListener(addCarButtonEnabler);
 		dailyRateSpinner.addChangeListener(e -> updateAddCarButtonState());
 
-		addCarButton.addActionListener(
-				e -> carController.createCar(
-						new CarViewModel(null, carPlateTextField.getText(), brandTextField.getText(),
-								modelTextField.getText(),
-								BigDecimal.valueOf(((Number) dailyRateSpinner.getValue()).doubleValue()))
-				)
-		);
+		addCarButton.addActionListener(e -> carController.createCar(
+				new CarViewModel(null, carPlateTextField.getText(), brandTextField.getText(), modelTextField.getText(),
+						BigDecimal.valueOf(((Number) dailyRateSpinner.getValue()).doubleValue()))));
 
 		createCarTitleLabel = new JLabel("Create Car");
 		createCarTitleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));
@@ -262,9 +254,26 @@ public class CarPanel extends JPanel implements CarView {
 	}
 
 	@Override
+	public void clearFields() {
+		carPlateTextField.setText("");
+		brandTextField.setText("");
+		modelTextField.setText("");
+		dailyRateSpinner.setValue(0.0);
+
+		updateAddCarButtonState();
+	}
+
+	@Override
 	public void showAllCars(List<CarViewModel> cars) {
 		carTableModel.setCars(cars);
 		resetErrorMessage();
+	}
+
+	@Override
+	public void onActivate() {
+		if (carController != null) {
+			carController.getAllCars();
+		}
 	}
 
 	private void resetErrorMessage() {
@@ -280,9 +289,9 @@ public class CarPanel extends JPanel implements CarView {
 	private void updateAddCarButtonState() {
 		addCarButton.setEnabled(isAddCarButtonEnabled());
 	}
-	
+
 	private void updateDeleteCarButtonState() {
-	    deleteCarButton.setEnabled(carTable.getSelectedRow() != -1);
+		deleteCarButton.setEnabled(carTable.getSelectedRow() != -1);
 	}
 
 	public void setCarController(CarController carController) {
@@ -293,7 +302,7 @@ public class CarPanel extends JPanel implements CarView {
 	JLabel getLblError() {
 		return errorLabel;
 	}
-	
+
 	CarTableModel getCarTableModel() {
 		return carTableModel;
 	}
