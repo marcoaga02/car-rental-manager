@@ -59,9 +59,9 @@
     <sonar.issue.ignore.multicriteria.e12.ruleKey>
       java:S2699
     </sonar.issue.ignore.multicriteria.e12.ruleKey>
-    <sonar.issue.ignore.multicriteria.e15.resourceKey>
+    <sonar.issue.ignore.multicriteria.e12.resourceKey>
       **/CarPanelTest.java
-    </sonar.issue.ignore.multicriteria.e15.resourceKey>
+    </sonar.issue.ignore.multicriteria.e12.resourceKey>
   </properties>
 
   <dependencies>
