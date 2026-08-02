@@ -19,6 +19,9 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Condition;
+import org.assertj.swing.timing.Pause;
+import static org.assertj.swing.timing.Timeout.timeout;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -281,6 +284,14 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
 
 		window.table(CAR_TABLE).selectRows(0);
+		
+		Pause.pause(new Condition("delete button enabled") {
+	        @Override
+	        public boolean test() {
+	            return window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).target().isEnabled();
+	        }
+	    }, timeout(5000));
+		
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
 		verify(carController).deleteCar(AN_ID);
