@@ -79,9 +79,7 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		carTable.getTableHeader().setForeground(Color.BLACK);
 		leftPanel.setLayout(new BorderLayout(0, 0));
 
-		carTable.getSelectionModel().addListSelectionListener(e -> {
-			updateDeleteCarButtonState();
-		});
+		carTable.getSelectionModel().addListSelectionListener(e -> updateDeleteCarButtonState());
 
 		JScrollPane scrollPane = new JScrollPane();
 		leftPanel.add(scrollPane);
