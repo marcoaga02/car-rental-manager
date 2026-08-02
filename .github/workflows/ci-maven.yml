@@ -43,8 +43,17 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml') }}
           restore-keys: ${{ runner.os }}-m2-
   
-      - name: Build with Maven
-        run: xvfb-run mvn verify ${{ matrix.additional-maven-args }}
+      - name: Install VNC server and window manager
+        run: sudo apt-get update && sudo apt-get install -y tigervnc-standalone-server fluxbox
+
+      - name: Configure VNC xstartup
+        run: |
+          mkdir -p ~/.vnc
+          printf '#!/bin/sh\nexec fluxbox \n' > ~/.vnc/xstartup
+          chmod +x ~/.vnc/xstartup
+
+      - name: Build with Maven under VNC
+        run: bash "$GITHUB_WORKSPACE/.github/workflows/scripts/execute-on-vnc.sh" mvn verify ${{ matrix.additional-maven-args }}
         working-directory: ${{ env.workdir }}
 
       - name: Generate JUnit Report
