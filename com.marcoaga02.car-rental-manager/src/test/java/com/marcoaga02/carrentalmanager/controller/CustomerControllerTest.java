@@ -103,6 +103,7 @@ class CustomerControllerTest {
 
 			InOrder inOrder = inOrder(customerService, customerView);
 			inOrder.verify(customerService).createCustomer(request);
+			inOrder.verify(customerView).clearFields();
 			inOrder.verify(customerService).getAllCustomers();
 			inOrder.verify(customerView).showAllCustomers(List.of(request));
 			inOrder.verifyNoMoreInteractions();
@@ -118,6 +119,7 @@ class CustomerControllerTest {
 
 			verify(customerService).createCustomer(request);
 			verify(customerView).showError(exception.getMessage());
+			verify(customerView, never()).clearFields();
 			verify(customerService, never()).getAllCustomers();
 			verify(customerView, never()).showAllCustomers(any());
 		}
@@ -132,6 +134,7 @@ class CustomerControllerTest {
 
 			verify(customerService).createCustomer(request);
 			verify(customerView).showError(exception.getMessage());
+			verify(customerView, never()).clearFields();
 			verify(customerService, never()).getAllCustomers();
 			verify(customerView, never()).showAllCustomers(any());
 		}
