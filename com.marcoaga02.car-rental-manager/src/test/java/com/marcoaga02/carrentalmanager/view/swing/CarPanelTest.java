@@ -282,7 +282,10 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 
 		window.table(CAR_TABLE).selectRows(0);
 		robot().waitForIdle();
+		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).requireEnabled();
+		
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
+		robot().waitForIdle();
 
 		verify(carController).deleteCar(AN_ID);
 		verifyNoMoreInteractions(carController);
