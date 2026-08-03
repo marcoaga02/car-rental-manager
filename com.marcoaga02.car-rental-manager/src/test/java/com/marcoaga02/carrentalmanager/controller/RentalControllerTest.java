@@ -25,18 +25,19 @@ import com.marcoaga02.carrentalmanager.exception.CarAlreadyRentedException;
 import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.CustomerNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.RentalNotFoundException;
+import com.marcoaga02.carrentalmanager.service.CarService;
+import com.marcoaga02.carrentalmanager.service.CustomerService;
 import com.marcoaga02.carrentalmanager.service.RentalService;
 import com.marcoaga02.carrentalmanager.view.RentalView;
+import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
+import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 import com.marcoaga02.carrentalmanager.viewmodel.RentalCreationRequest;
 import com.marcoaga02.carrentalmanager.viewmodel.RentalViewModel;
 
 @ExtendWith(MockitoExtension.class)
 class RentalControllerTest {
 
-	private static final Long A_CAR_ID = 10L;
-	private static final Long A_CUSTOMER_ID = 11L;
-	private static final Long A_RENTAL_ID = 12L;
-
+	private static final Long A_RENTAL_ID = 10L;
 	private static final LocalDate A_START_DATE = LocalDate.of(2026, Month.JUNE, 24);
 	private static final LocalDate AN_END_DATE = LocalDate.of(2026, Month.JUNE, 30);
 	private static final Integer A_NUMBER_OF_DAYS = 6;
@@ -51,9 +52,37 @@ class RentalControllerTest {
 	private static final String ANOTHER_CUSTOMER_FULLNAME = "anotherFirstname anotherLastname";
 	private static final String ANOTHER_CAR_DESCRIPTION = "anotherBrand anotherModel [anotherCarPlate]";
 	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = new BigDecimal("123.5");
+	
+	private static final Long A_CAR_ID = 12L;
+	private static final String A_CAR_PLATE = "aCarPlate";
+	private static final String A_BRAND = "aBrand";
+	private static final String A_MODEL = "aModel";
+	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
+
+	private static final Long ANOTHER_CAR_ID = 13L;
+	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
+	private static final String ANOTHER_BRAND = "anotherBrand";
+	private static final String ANOTHER_MODEL = "anotherModel";
+	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
+	
+	private static final Long A_CUSTOMER_ID = 14L;
+	private static final String A_TAX_ID_CODE = "aTaxIdCode";
+	private static final String A_FIRSTNAME = "aFirstname";
+	private static final String A_LASTNAME = "aLastname";
+
+	private static final Long ANOTHER_CUSTOMER_ID = 15L;
+	private static final String ANOTHER_TAX_ID_CODE = "anotherTaxIdCode";
+	private static final String ANOTHER_FIRSTNAME = "anotherFirstname";
+	private static final String ANOTHER_LASTNAME = "anotherLastname";
 
 	@Mock
 	private RentalService rentalService;
+	
+	@Mock
+	private CarService carService;
+	
+	@Mock
+	private CustomerService customerService;
 
 	@Mock
 	private RentalView rentalView;
@@ -235,6 +264,96 @@ class RentalControllerTest {
 			verify(rentalView, never()).showAllRentals(any());
 		}
 
+	}
+	
+	@Nested
+	class LoadAvailableCars {
+	
+		@Test
+		void testLoadAvailableCarsWhenThereAreNoCarsCallsShowAvailableCarsWithEmptyList() {
+			when(carService.getAvailableCars()).thenReturn(Collections.emptyList());
+
+			rentalController.loadAvailableCars();
+
+			InOrder inOrder = inOrder(carService, rentalView);
+			inOrder.verify(carService).getAvailableCars();
+			inOrder.verify(rentalView).showAvailableCars(Collections.emptyList());
+			inOrder.verifyNoMoreInteractions();
+		}
+
+		@Test
+		void testLoadAvailableCarsWhenThereIsOnlyOneCarCallsShowAvailableCarsWithAListWithOneElement() {
+			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+			when(carService.getAvailableCars()).thenReturn(List.of(car));
+
+			rentalController.loadAvailableCars();
+
+			InOrder inOrder = inOrder(carService, rentalView);
+			inOrder.verify(carService).getAvailableCars();
+			inOrder.verify(rentalView).showAvailableCars(List.of(car));
+			inOrder.verifyNoMoreInteractions();
+		}
+
+		@Test
+		void testLoadAvailableCarsWhenThereAreSeveralCarsCallsShowAvailableCarsWithAListWithAllElements() {
+			CarViewModel firstCar = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+			CarViewModel secondCar = new CarViewModel(ANOTHER_CAR_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
+					ANOTHER_DAILY_RATE);
+			when(carService.getAvailableCars()).thenReturn(List.of(firstCar, secondCar));
+
+			rentalController.loadAvailableCars();
+
+			InOrder inOrder = inOrder(carService, rentalView);
+			inOrder.verify(carService).getAvailableCars();
+			inOrder.verify(rentalView).showAvailableCars(List.of(firstCar, secondCar));
+			inOrder.verifyNoMoreInteractions();
+		}
+		
+	}
+	
+	@Nested
+	class LoadAvailableCustomers {
+		
+		@Test
+		void testLoadAvailableCustomersWhenThereAreNoCustomersCallsShowAvailableCustomersWithEmptyList() {
+			when(customerService.getAllCustomers()).thenReturn(Collections.emptyList());
+
+			rentalController.loadAvailableCustomers();
+
+			InOrder inOrder = inOrder(customerService, rentalView);
+			inOrder.verify(customerService).getAllCustomers();
+			inOrder.verify(rentalView).showAvailableCustomers(Collections.emptyList());
+			inOrder.verifyNoMoreInteractions();
+		}
+
+		@Test
+		void testLoadAvailableCustomersWhenThereIsOnlyOneCustomerCallsShowAvailableCustomersWithAListWithOneElement() {
+			CustomerViewModel customer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			when(customerService.getAllCustomers()).thenReturn(List.of(customer));
+
+			rentalController.loadAvailableCustomers();
+
+			InOrder inOrder = inOrder(customerService, rentalView);
+			inOrder.verify(customerService).getAllCustomers();
+			inOrder.verify(rentalView).showAvailableCustomers(List.of(customer));
+			inOrder.verifyNoMoreInteractions();
+		}
+
+		@Test
+		void testLoadAvailableCustomersWhenThereAreSeveralCustomersCallsShowAvailableCustomersWithAListWithAllElements() {
+			CustomerViewModel firstCustomer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			CustomerViewModel secondCustomer = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE,
+					ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+			when(customerService.getAllCustomers()).thenReturn(List.of(firstCustomer, secondCustomer));
+
+			rentalController.loadAvailableCustomers();
+
+			InOrder inOrder = inOrder(customerService, rentalView);
+			inOrder.verify(customerService).getAllCustomers();
+			inOrder.verify(rentalView).showAvailableCustomers(List.of(firstCustomer, secondCustomer));
+			inOrder.verifyNoMoreInteractions();
+		}
+		
 	}
 
 }
