@@ -10,12 +10,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.marcoaga02.carrentalmanager.controller.CarController;
+import com.marcoaga02.carrentalmanager.controller.CustomerController;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
+import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
 import com.marcoaga02.carrentalmanager.service.CarService;
 import com.marcoaga02.carrentalmanager.service.CarServiceImpl;
+import com.marcoaga02.carrentalmanager.service.CustomerService;
+import com.marcoaga02.carrentalmanager.service.CustomerServiceImpl;
 import com.marcoaga02.carrentalmanager.transaction.jpa.TransactionManagerJpa;
 import com.marcoaga02.carrentalmanager.view.swing.ActivablePanel;
 import com.marcoaga02.carrentalmanager.view.swing.MainFrame;
+import com.marcoaga02.carrentalmanager.view.swing.TabActivationListener;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -25,6 +30,9 @@ import picocli.CommandLine.Option;
 
 @Command(mixinStandardHelpOptions = true)
 public class CarRentalManagerSwingApp implements Callable<Void> {
+
+	private static final int CAR_TAB_INDEX = 0;
+	private static final int CUSTOMER_TAB_INDEX = 1;
 
 	@Option(names = { "--db-host" }, description = "Database host addess")
 	private String dbHost = "localhost";
@@ -68,12 +76,24 @@ public class CarRentalManagerSwingApp implements Callable<Void> {
 				transactionManager = new TransactionManagerJpa(entityManagerFactory, clock);
 
 				CarService carService = new CarServiceImpl(transactionManager, new CarMapper());
+				CustomerService customerService = new CustomerServiceImpl(transactionManager, new CustomerMapper());
 
 				MainFrame mainFrame = new MainFrame();
 
 				CarController carController = new CarController(carService, mainFrame.getCarPanel());
+				CustomerController customerController = new CustomerController(customerService,
+						mainFrame.getCustomerPanel());
 
 				mainFrame.getCarPanel().setCarController(carController);
+				mainFrame.getCustomerPanel().setCustomerController(customerController);
+
+				Map<Integer, ActivablePanel> activablePanelsByIndex = Map.of(
+						CAR_TAB_INDEX, mainFrame.getCarPanel(),
+						CUSTOMER_TAB_INDEX, mainFrame.getCustomerPanel()
+				);
+				
+				mainFrame.getTabbedPane().addChangeListener(
+						new TabActivationListener(mainFrame.getTabbedPane(), activablePanelsByIndex));
 
 				Component initiallySelected = mainFrame.getTabbedPane().getSelectedComponent();
 				if (initiallySelected instanceof ActivablePanel) {
@@ -89,4 +109,5 @@ public class CarRentalManagerSwingApp implements Callable<Void> {
 		});
 		return null;
 	}
+
 }

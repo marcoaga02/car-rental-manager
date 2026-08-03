@@ -1,8 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
 import java.awt.BorderLayout;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,11 +13,10 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int CAR_TAB_INDEX = 0;
-
+	private JTabbedPane tabbedPane;
 	private JPanel contentPane;
 	private CarPanel carPanel;
-	private JTabbedPane tabbedPane;
+	private CustomerPanel customerPanel;
 
 	/**
 	 * Create the frame.
@@ -27,6 +24,7 @@ public class MainFrame extends JFrame {
 	public MainFrame() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 829, 406);
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -37,18 +35,17 @@ public class MainFrame extends JFrame {
 
 		carPanel = new CarPanel();
 		tabbedPane.addTab("Car", null, carPanel, null);
-
-		tabbedPane.addChangeListener(new TabActivationListener(tabbedPane, buildActivablePanelsByIndex()));
-	}
-
-	private Map<Integer, ActivablePanel> buildActivablePanelsByIndex() {
-		Map<Integer, ActivablePanel> map = new HashMap<>();
-		map.put(CAR_TAB_INDEX, carPanel);
-		return map;
+		
+		customerPanel = new CustomerPanel();
+		tabbedPane.addTab("Customer", null, customerPanel, null);
 	}
 
 	public CarPanel getCarPanel() {
 		return carPanel;
+	}
+	
+	public CustomerPanel getCustomerPanel() {
+		return customerPanel;
 	}
 
 	public JTabbedPane getTabbedPane() {
