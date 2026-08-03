@@ -31,9 +31,9 @@ import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
 public class CarPanel extends JPanel implements CarView, ActivablePanel {
 
-	private static final String DIALOG_FONT = "Dialog";
-
 	private static final long serialVersionUID = 1L;
+
+	private static final String DIALOG_FONT = "Dialog";
 
 	private transient CarController carController;
 
@@ -295,7 +295,7 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 	}
 
 	// package-private for tests only
-	JLabel getLblError() {
+	JLabel getErrorLabel() {
 		return errorLabel;
 	}
 

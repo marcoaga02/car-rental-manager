@@ -109,7 +109,7 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 				ANOTHER_DAILY_RATE);
 
 		GuiActionRunner.execute(() -> {
-			carPanel.getLblError().setText("error message");
+			carPanel.getErrorLabel().setText("error message");
 			carPanel.showAllCars(List.of(car1, car2));
 		});
 
@@ -268,13 +268,14 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCarButtonShouldDelegateToCarControllerDeleteCar() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
+		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car1, car2)));
 
-		window.table(CAR_TABLE).selectRows(0);
+		window.table(CAR_TABLE).selectRows(1);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		verify(carController).deleteCar(AN_ID);
+		verify(carController).deleteCar(ANOTHER_ID);
 		verifyNoMoreInteractions(carController);
 	}
 
