@@ -2,6 +2,7 @@ package com.marcoaga02.carrentalmanager.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
+import com.marcoaga02.carrentalmanager.model.Rental;
 import com.marcoaga02.carrentalmanager.transaction.TransactionManager;
 import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
 
@@ -27,13 +29,8 @@ public class CarServiceImpl implements CarService {
 
 	@Override
 	public List<CarViewModel> getAllCars() {
-		return transactionManager
-				.doInTransaction(ctx -> ctx
-						.carRepository()
-						.findAllActive()
-						.stream()
-						.map(carMapper::toViewModel)
-						.collect(Collectors.toList()));
+		return transactionManager.doInTransaction(ctx -> ctx.carRepository().findAllActive().stream()
+				.map(carMapper::toViewModel).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -89,6 +86,20 @@ public class CarServiceImpl implements CarService {
 			ctx.carRepository().save(car);
 
 			return null;
+		});
+	}
+
+	@Override
+	public List<CarViewModel> getAvailableCars() {
+		return transactionManager.doInTransaction(ctx -> {
+			List<Car> allActiveCars = ctx.carRepository().findAllActive();
+			List<Rental> activeRentals = ctx.rentalRepository().findAllActive();
+
+			Set<String> rentedCarPlates = activeRentals.stream().map(r -> r.getCar().getCarPlate())
+					.collect(Collectors.toSet());
+
+			return allActiveCars.stream().filter(car -> !rentedCarPlates.contains(car.getCarPlate()))
+					.map(carMapper::toViewModel).collect(Collectors.toList());
 		});
 	}
 

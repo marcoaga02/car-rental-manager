@@ -42,4 +42,11 @@ public interface CarService {
 	 */
 	void deleteCar(Long carId);
 
+	/**
+	 * Retrieves all cars that are active and not currently rented.
+	 *
+	 * @return the list of available cars, or an empty list if none exist
+	 */
+	List<CarViewModel> getAvailableCars();
+
 }

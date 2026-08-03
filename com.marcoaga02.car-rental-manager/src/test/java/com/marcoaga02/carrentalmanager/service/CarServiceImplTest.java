@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +36,8 @@ import com.marcoaga02.carrentalmanager.exception.CarNotFoundException;
 import com.marcoaga02.carrentalmanager.exception.DuplicateCarPlateException;
 import com.marcoaga02.carrentalmanager.mapper.CarMapper;
 import com.marcoaga02.carrentalmanager.model.Car;
+import com.marcoaga02.carrentalmanager.model.Customer;
+import com.marcoaga02.carrentalmanager.model.Rental;
 import com.marcoaga02.carrentalmanager.repository.CarRepository;
 import com.marcoaga02.carrentalmanager.repository.RentalRepository;
 import com.marcoaga02.carrentalmanager.transaction.TransactionCode;
@@ -77,6 +80,13 @@ class CarServiceImplTest {
 
 	private static final Long AN_ID = 10L;
 	private static final Long ANOTHER_ID = 13L;
+
+	private static final String A_TAX_ID_CODE = "aTaxIdCode";
+	private static final String A_FIRSTNAME = "aFirstname";
+	private static final String A_LASTNAME = "aLastname";
+
+	private static final LocalDate A_START_DATE = LocalDate.now();
+	private static final Integer A_NUMBER_OF_DAYS = 5;
 
 	private Car car, anotherCar;
 	private CarViewModel carViewModel, anotherCarViewModel;
@@ -320,6 +330,108 @@ class CarServiceImplTest {
 
 			verify(carRepository).findActiveById(AN_ID);
 			verify(rentalRepository).existsActiveByCarId(AN_ID);
+			verifyNoMoreInteractions(carRepository, rentalRepository);
+			verifyNoInteractions(carMapper);
+		}
+
+	}
+
+	@Nested
+	class GetAvailableCars {
+
+		@Test
+		void testGetAvailableCarsWhenThereAreNoCarsReturnsAnEmptyList() {
+			stubTransaction().withRentalRepository();
+
+			when(carRepository.findAllActive()).thenReturn(Collections.emptyList());
+			when(rentalRepository.findAllActive()).thenReturn(Collections.emptyList());
+
+			List<CarViewModel> result = carService.getAvailableCars();
+
+			assertThat(result).isEmpty();
+
+			verify(carRepository).findAllActive();
+			verify(rentalRepository).findAllActive();
+			verifyNoMoreInteractions(carRepository, rentalRepository);
+			verifyNoInteractions(carMapper);
+		}
+
+		@Test
+		void testGetAvailableCarsWhenThereAreNoActiveRentalsReturnsAllCars() {
+			stubTransaction().withRentalRepository();
+
+			when(carRepository.findAllActive()).thenReturn(List.of(car));
+			when(rentalRepository.findAllActive()).thenReturn(Collections.emptyList());
+			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
+
+			List<CarViewModel> result = carService.getAvailableCars();
+
+			assertThat(result).hasSize(1).containsExactly(carViewModel);
+
+			verify(carRepository).findAllActive();
+			verify(rentalRepository).findAllActive();
+			verify(carMapper).toViewModel(car);
+			verifyNoMoreInteractions(carRepository, rentalRepository, carMapper);
+		}
+
+		@Test
+		void testGetAvailableCarsWhenCarHasActiveRentalIsExcluded() {
+			stubTransaction().withRentalRepository();
+
+			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			Rental activeRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+
+			when(carRepository.findAllActive()).thenReturn(List.of(car));
+			when(rentalRepository.findAllActive()).thenReturn(List.of(activeRental));
+
+			List<CarViewModel> result = carService.getAvailableCars();
+
+			assertThat(result).isEmpty();
+
+			verify(carRepository).findAllActive();
+			verify(rentalRepository).findAllActive();
+			verifyNoMoreInteractions(carRepository, rentalRepository);
+			verifyNoInteractions(carMapper);
+		}
+
+		@Test
+		void testGetAvailableCarsWhenOnlySomeCarsAreRentedReturnsOnlyTheAvailableOnes() {
+			stubTransaction().withRentalRepository();
+
+			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			Rental activeRental = new Rental(anotherCar, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+
+			when(carRepository.findAllActive()).thenReturn(List.of(car, anotherCar));
+			when(rentalRepository.findAllActive()).thenReturn(List.of(activeRental));
+			when(carMapper.toViewModel(car)).thenReturn(carViewModel);
+
+			List<CarViewModel> result = carService.getAvailableCars();
+
+			assertThat(result).hasSize(1).containsExactly(carViewModel);
+
+			verify(carRepository).findAllActive();
+			verify(rentalRepository).findAllActive();
+			verify(carMapper).toViewModel(car);
+			verifyNoMoreInteractions(carRepository, rentalRepository, carMapper);
+		}
+
+		@Test
+		void testGetAvailableCarsWhenAllCarsAreRentedReturnsAnEmptyList() {
+			stubTransaction().withRentalRepository();
+
+			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			Rental firstRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+			Rental secondRental = new Rental(anotherCar, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+
+			when(carRepository.findAllActive()).thenReturn(List.of(car, anotherCar));
+			when(rentalRepository.findAllActive()).thenReturn(List.of(firstRental, secondRental));
+
+			List<CarViewModel> result = carService.getAvailableCars();
+
+			assertThat(result).isEmpty();
+
+			verify(carRepository).findAllActive();
+			verify(rentalRepository).findAllActive();
 			verifyNoMoreInteractions(carRepository, rentalRepository);
 			verifyNoInteractions(carMapper);
 		}
