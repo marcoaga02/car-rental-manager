@@ -1,11 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -14,18 +9,16 @@ import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import com.marcoaga02.carrentalmanager.controller.CarController;
 
 @RunWith(GUITestRunner.class)
 public class MainFrameTest extends AssertJSwingJUnitTestCase {
 
 	private static final int CAR_TAB_INDEX = 0;
+	private static final int CUSTOMER_TAB_INDEX = 1;
 
-	@Mock
-	private CarController carController;
+	private static final String CAR_TAB = "Car";
+	private static final String CUSTOMER_TAB = "Customer";
 
 	private AutoCloseable closeable;
 	private FrameFixture window;
@@ -36,7 +29,6 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
 		closeable = MockitoAnnotations.openMocks(this);
 		window = new FrameFixture(robot(), GuiActionRunner.execute(() -> {
 			mainFrame = new MainFrame();
-			mainFrame.getCarPanel().setCarController(carController);
 			return mainFrame;
 		}));
 
@@ -51,29 +43,17 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testCarTabIsPresentAndContainsCarPanelAtIndexZero() {
-		window.tabbedPane().selectTab("Car");
+		window.tabbedPane().selectTab(CAR_TAB);
 		assertThat(mainFrame.getCarPanel()).isNotNull();
 		assertThat(mainFrame.getTabbedPane().getComponentAt(CAR_TAB_INDEX)).isSameAs(mainFrame.getCarPanel());
 	}
 
 	@Test
 	@GUITest
-	public void testSelectingCarTabTriggersOnActivateOnCarController() {
-		GuiActionRunner.execute(() -> {
-			JTabbedPane tabbedPane = mainFrame.getTabbedPane();
-			int temporaryTabIndex = tabbedPane.getTabCount();
-
-			tabbedPane.addTab("Other", new JPanel());
-			tabbedPane.setSelectedIndex(temporaryTabIndex);
-			tabbedPane.setSelectedIndex(CAR_TAB_INDEX); 
-		});
-
-		verify(carController).getAllCars();
+	public void testCustomerTabIsPresentAndContainsCustomerPanelAtIndexOne() {
+		window.tabbedPane().selectTab(CUSTOMER_TAB);
+		assertThat(mainFrame.getCarPanel()).isNotNull();
+		assertThat(mainFrame.getTabbedPane().getComponentAt(CUSTOMER_TAB_INDEX)).isSameAs(mainFrame.getCustomerPanel());
 	}
-
-	@Test
-	@GUITest
-	public void testNoInteractionsWithControllerBeforeTabSelection() {
-		verifyNoInteractions(carController);
-	}
+	
 }
