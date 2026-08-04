@@ -1,6 +1,7 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -16,9 +17,11 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
 
 	private static final int CAR_TAB_INDEX = 0;
 	private static final int CUSTOMER_TAB_INDEX = 1;
+	private static final int RENTALS_TAB_INDEX = 2;
 
-	private static final String CAR_TAB = "Car";
-	private static final String CUSTOMER_TAB = "Customer";
+	private static final String CARS_TAB = "Cars";
+	private static final String CUSTOMERS_TAB = "Customers";
+	private static final String RENTALS_TAB = "Rentals";
 
 	private AutoCloseable closeable;
 	private FrameFixture window;
@@ -42,18 +45,32 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testCarTabIsPresentAndContainsCarPanelAtIndexZero() {
-		window.tabbedPane().selectTab(CAR_TAB);
+	public void testCarsTabIsPresentAndContainsCarPanelAtIndexZero() {
+		window.tabbedPane().selectTab(CARS_TAB);
 		assertThat(mainFrame.getCarPanel()).isNotNull();
 		assertThat(mainFrame.getTabbedPane().getComponentAt(CAR_TAB_INDEX)).isSameAs(mainFrame.getCarPanel());
 	}
 
 	@Test
 	@GUITest
-	public void testCustomerTabIsPresentAndContainsCustomerPanelAtIndexOne() {
-		window.tabbedPane().selectTab(CUSTOMER_TAB);
+	public void testCustomersTabIsPresentAndContainsCustomerPanelAtIndexOne() {
+		window.tabbedPane().selectTab(CUSTOMERS_TAB);
 		assertThat(mainFrame.getCarPanel()).isNotNull();
 		assertThat(mainFrame.getTabbedPane().getComponentAt(CUSTOMER_TAB_INDEX)).isSameAs(mainFrame.getCustomerPanel());
 	}
-	
+
+	@Test
+	@GUITest
+	public void testRentalsTabIsPresentAndContainsRentalPanelAtIndexTwo() {
+		window.tabbedPane().selectTab(RENTALS_TAB);
+		assertThat(mainFrame.getCarPanel()).isNotNull();
+		assertThat(mainFrame.getTabbedPane().getComponentAt(RENTALS_TAB_INDEX)).isSameAs(mainFrame.getRentalPanel());
+	}
+
+	@Test
+	public void testActivablePanelsByIndexIsComposedCorrectly() {
+		assertThat(mainFrame.getActivablePanelsByIndex()).containsExactly(entry(0, mainFrame.getCarPanel()),
+				entry(1, mainFrame.getCustomerPanel()), entry(2, mainFrame.getRentalPanel()));
+	}
+
 }
