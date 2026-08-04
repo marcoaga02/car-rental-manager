@@ -29,9 +29,13 @@ class CustomerTableModelTest {
 
 	private CustomerTableModel customerTableModel;
 
+	private CustomerViewModel customer, anotherCustomer;
+
 	@BeforeEach
 	void setUp() {
 		customerTableModel = new CustomerTableModel();
+		customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 	}
 
 	@Test
@@ -49,7 +53,7 @@ class CustomerTableModelTest {
 
 	@Test
 	void testSetCustomersWithEmptyListShouldClearTable() {
-		customerTableModel.getCustomers().add(new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		customerTableModel.getCustomers().add(customer);
 		customerTableModel.setCustomers(List.of());
 
 		assertThat(customerTableModel.getCustomers()).isEmpty();
@@ -57,7 +61,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testSetCustomersWithAListOfOneElementAddTheElement() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.setCustomers(List.of(customer));
 
 		assertThat(customerTableModel.getCustomers()).containsExactly(customer);
@@ -65,55 +68,42 @@ class CustomerTableModelTest {
 
 	@Test
 	void testSetCustomersWithAListOfMultipleElementsAddAllTheElements() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-		customerTableModel.setCustomers(List.of(customer1, customer2));
+		customerTableModel.setCustomers(List.of(customer, anotherCustomer));
 
-		assertThat(customerTableModel.getCustomers()).containsExactlyInAnyOrder(customer1, customer2);
+		assertThat(customerTableModel.getCustomers()).containsExactlyInAnyOrder(customer, anotherCustomer);
 	}
 
 	@Test
 	void testSetCustomersShouldReplacePreviousCustomers() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		customerTableModel.getCustomers().add(customer1);
+		customerTableModel.getCustomers().add(customer);
 
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-		customerTableModel.setCustomers(List.of(customer2));
+		customerTableModel.setCustomers(List.of(anotherCustomer));
 
-		assertThat(customerTableModel.getCustomers()).containsExactly(customer2);
+		assertThat(customerTableModel.getCustomers()).containsExactly(anotherCustomer);
 	}
 
 	@Test
 	void testSetCustomersShouldDefensivelyCopyTheGivenList() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		List<CustomerViewModel> originalList = new ArrayList<>(List.of(customer1));
+		List<CustomerViewModel> originalList = new ArrayList<>(List.of(customer));
 
 		customerTableModel.setCustomers(originalList);
 
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-		originalList.add(customer2);
+		originalList.add(anotherCustomer);
 
-		assertThat(customerTableModel.getCustomers()).containsExactly(customer1);
+		assertThat(customerTableModel.getCustomers()).containsExactly(customer);
 	}
 
 	@Test
 	void testGetCustomerAtShouldReturnCorrectCustomer() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
 		List<CustomerViewModel> customers = customerTableModel.getCustomers();
-		customers.add(customer1);
-		customers.add(customer2);
+		customers.add(customer);
+		customers.add(anotherCustomer);
 
-		assertThat(customerTableModel.getCustomerAt(1)).isEqualTo(customer2);
+		assertThat(customerTableModel.getCustomerAt(1)).isEqualTo(anotherCustomer);
 	}
 
 	@Test
 	void testGetCustomerAtWithInvalidIndexShouldThrowIllegalArgumentException() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThatThrownBy(() -> customerTableModel.getCustomerAt(4)).isInstanceOf(IllegalArgumentException.class)
@@ -122,7 +112,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testGetCustomerAtWithInvalidBoundaryIndexShouldThrowIllegalArgumentException() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThatThrownBy(() -> customerTableModel.getCustomerAt(1)).isInstanceOf(IllegalArgumentException.class)
@@ -131,7 +120,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testGetValueAtShouldReturnCorrectValues() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThat(customerTableModel.getValueAt(0, 0)).isEqualTo(A_TAX_ID_CODE);
@@ -141,7 +129,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testGetValueAtWithInvalidColumnShouldThrowIllegalArgumentException() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThatThrownBy(() -> customerTableModel.getValueAt(0, 3)).isInstanceOf(IllegalArgumentException.class)
@@ -150,7 +137,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testGetValueAtWithInvalidRowShouldThrowIllegalArgumentException() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThatThrownBy(() -> customerTableModel.getValueAt(4, 0)).isInstanceOf(IllegalArgumentException.class)
@@ -159,7 +145,6 @@ class CustomerTableModelTest {
 
 	@Test
 	void testGetValueAtWithInvalidBoundaryRowShouldThrowIllegalArgumentException() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		customerTableModel.getCustomers().add(customer);
 
 		assertThatThrownBy(() -> customerTableModel.getValueAt(1, 0)).isInstanceOf(IllegalArgumentException.class)

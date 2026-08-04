@@ -25,6 +25,7 @@ import com.marcoaga02.carrentalmanager.controller.CustomerController;
 import com.marcoaga02.carrentalmanager.view.CustomerView;
 import com.marcoaga02.carrentalmanager.view.swing.model.CustomerTableModel;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
+import javax.swing.SwingConstants;
 
 public class CustomerPanel extends JPanel implements CustomerView, ActivablePanel {
 
@@ -108,7 +109,7 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 		rightPanel.add(fieldPanel, BorderLayout.CENTER);
 
 		GridBagLayout gbl_fieldPanel = new GridBagLayout();
-		gbl_fieldPanel.columnWidths = new int[] { 0, 0 };
+		gbl_fieldPanel.columnWidths = new int[] { 160, 0 };
 		gbl_fieldPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_fieldPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gbl_fieldPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 };
@@ -127,7 +128,6 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 
 		taxIdCodeTextField = new JTextField();
 		taxIdCodeTextField.setName("taxIdCodeTextField");
-		taxIdCodeTextField.setColumns(15);
 		GridBagConstraints gbc_taxIdCodeTextField = new GridBagConstraints();
 		gbc_taxIdCodeTextField.gridwidth = 1;
 		gbc_taxIdCodeTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -149,7 +149,6 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 
 		firstnameTextField = new JTextField();
 		firstnameTextField.setName("firstnameTextField");
-		firstnameTextField.setColumns(15);
 		GridBagConstraints gbc_firstnameTextField = new GridBagConstraints();
 		gbc_firstnameTextField.gridwidth = 1;
 		gbc_firstnameTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -170,7 +169,6 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 
 		lastnameTextField = new JTextField();
 		lastnameTextField.setName("lastnameTextField");
-		lastnameTextField.setColumns(15);
 		GridBagConstraints gbc_lastnameTextField = new GridBagConstraints();
 		gbc_lastnameTextField.gridwidth = 1;
 		gbc_lastnameTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -213,6 +211,7 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 				taxIdCodeTextField.getText(), firstnameTextField.getText(), lastnameTextField.getText())));
 		
 		createCustomerTitleLabel = new JLabel("Create Customer");
+		createCustomerTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		createCustomerTitleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));
 		rightPanel.add(createCustomerTitleLabel, BorderLayout.NORTH);
 	}
