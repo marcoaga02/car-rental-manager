@@ -144,22 +144,26 @@ class RentalControllerTest {
 		void testCreateRentalWhenSuccessfulRefreshesTheRentalList() {
 			RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
 					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-
+			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
+
 			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental));
+			when(carService.getAvailableCars()).thenReturn(List.of(car));
 
 			rentalController.createRental(request);
 
-			InOrder inOrder = inOrder(rentalService, rentalView);
+			InOrder inOrder = inOrder(rentalService, carService, rentalView);
 			inOrder.verify(rentalService).createRental(request);
 			inOrder.verify(rentalView).clearFields();
 			inOrder.verify(rentalService).getAllActiveRentals();
 			inOrder.verify(rentalView).showAllRentals(List.of(rental));
+			inOrder.verify(carService).getAvailableCars();
+			inOrder.verify(rentalView).showAvailableCars(List.of(car));
 			inOrder.verifyNoMoreInteractions();
 		}
 
 		@Test
-		void testCreateCarWhenCarNotFoundShowsErrorAndDoesNotRefreshList() {
+		void testCreateRentalWhenCarNotFoundShowsErrorAndDoesNotRefreshList() {
 			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			CarNotFoundException exception = new CarNotFoundException(A_CAR_ID);
 			doThrow(exception).when(rentalService).createRental(request);
@@ -171,10 +175,12 @@ class RentalControllerTest {
 			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 		@Test
-		void testCreateCarWhenCustomerNotFoundShowsErrorAndDoesNotRefreshList() {
+		void testCreateRentalWhenCustomerNotFoundShowsErrorAndDoesNotRefreshList() {
 			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			CustomerNotFoundException exception = new CustomerNotFoundException(A_CUSTOMER_ID);
 			doThrow(exception).when(rentalService).createRental(request);
@@ -186,10 +192,12 @@ class RentalControllerTest {
 			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 		@Test
-		void testCreateCarWhenAreIsAlreadyRentedShowsErrorAndDoesNotRefreshList() {
+		void testCreateRentalWhenAreIsAlreadyRentedShowsErrorAndDoesNotRefreshList() {
 			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			CarAlreadyRentedException exception = new CarAlreadyRentedException(A_CAR_ID);
 			doThrow(exception).when(rentalService).createRental(request);
@@ -201,10 +209,12 @@ class RentalControllerTest {
 			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 		@Test
-		void testCreateCarWhenInvalidInputShowsErrorAndDoesNotRefreshList() {
+		void testCreateRentalWhenInvalidInputShowsErrorAndDoesNotRefreshList() {
 			RentalCreationRequest request = new RentalCreationRequest(null, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			IllegalArgumentException exception = new IllegalArgumentException("carId must not be blank");
 			doThrow(exception).when(rentalService).createRental(request);
@@ -216,6 +226,8 @@ class RentalControllerTest {
 			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 	}
@@ -227,14 +239,19 @@ class RentalControllerTest {
 		void testDeleteRentalWhenSuccessfulRefreshesTheRentalList() {
 			RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
 					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
+			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+
 			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental));
+			when(carService.getAvailableCars()).thenReturn(List.of(car));
 
 			rentalController.deleteRental(A_RENTAL_ID);
 
-			InOrder inOrder = inOrder(rentalService, rentalView);
+			InOrder inOrder = inOrder(rentalService, carService, rentalView);
 			inOrder.verify(rentalService).deleteRental(A_RENTAL_ID);
 			inOrder.verify(rentalService).getAllActiveRentals();
 			inOrder.verify(rentalView).showAllRentals(List.of(rental));
+			inOrder.verify(carService).getAvailableCars();
+			inOrder.verify(rentalView).showAvailableCars(List.of(car));
 			inOrder.verifyNoMoreInteractions();
 		}
 
@@ -249,6 +266,8 @@ class RentalControllerTest {
 			verify(rentalView).showError(exception.getMessage());
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 		@Test
@@ -262,6 +281,8 @@ class RentalControllerTest {
 			verify(rentalView).showError(exception.getMessage());
 			verify(rentalService, never()).getAllActiveRentals();
 			verify(rentalView, never()).showAllRentals(any());
+			verify(carService, never()).getAvailableCars();
+			verify(rentalView, never()).showAvailableCars(any());
 		}
 
 	}

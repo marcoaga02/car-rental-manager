@@ -241,8 +241,7 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 			CustomerViewModel selectedCustomer = (CustomerViewModel) customerComboBox.getSelectedItem();
 			int rentalDays = ((Number) rentalDaysSpinner.getValue()).intValue();
 
-			rentalController
-					.createRental(new RentalCreationRequest(selectedCar.getId(), selectedCustomer.getId(), rentalDays));
+			rentalController.createRental(new RentalCreationRequest(selectedCar.getId(), selectedCustomer.getId(), rentalDays));
 		});
 	}
 

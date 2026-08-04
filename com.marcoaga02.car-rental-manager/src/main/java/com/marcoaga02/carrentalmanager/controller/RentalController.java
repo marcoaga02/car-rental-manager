@@ -34,17 +34,22 @@ public class RentalController {
 		try {
 			rentalService.createRental(request);
 			rentalView.clearFields();
-			this.getAllActiveRentals();
+			reloadView();
 		} catch (IllegalArgumentException | CarNotFoundException | CustomerNotFoundException
 				| CarAlreadyRentedException e) {
 			rentalView.showError(e.getMessage());
 		}
 	}
 
+	private void reloadView() {
+		this.getAllActiveRentals();
+		this.loadAvailableCars();
+	}
+
 	public void deleteRental(Long rentalId) {
 		try {
 			rentalService.deleteRental(rentalId);
-			this.getAllActiveRentals();
+			reloadView();
 		} catch (IllegalArgumentException | RentalNotFoundException e) {
 			rentalView.showError(e.getMessage());
 		}
