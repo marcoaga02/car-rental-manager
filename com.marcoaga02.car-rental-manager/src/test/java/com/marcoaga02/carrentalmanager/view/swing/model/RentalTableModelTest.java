@@ -22,7 +22,7 @@ class RentalTableModelTest {
 	private static final Integer A_NUMBER_OF_DAYS = 6;
 	private static final String A_CUSTOMER_FULLNAME = "aFirstname aLastname";
 	private static final String A_CAR_DESCRIPTION = "aBrand aModel [aCarPlate]";
-	private static final BigDecimal A_TOTAL_AMOUNT = new BigDecimal("61.2");
+	private static final BigDecimal A_TOTAL_AMOUNT = BigDecimal.valueOf(61.2);
 
 	private static final Long ANOTHER_RENTAL_ID = 11L;
 	private static final LocalDate ANOTHER_START_DATE = LocalDate.of(2026, Month.JULY, 10);
@@ -30,8 +30,11 @@ class RentalTableModelTest {
 	private static final Integer ANOTHER_NUMBER_OF_DAYS = 15;
 	private static final String ANOTHER_CUSTOMER_FULLNAME = "anotherFirstname anotherLastname";
 	private static final String ANOTHER_CAR_DESCRIPTION = "anotherBrand anotherModel [anotherCarPlate]";
-	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = new BigDecimal("123.5");
+	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = BigDecimal.valueOf(123.5);
 
+	private static final String A_FORMATTED_START_DATE = "24/06/2026";
+	private static final String A_FORMATTED_END_DATE = "30/06/2026";
+	
 	private static final String CUSTOMER_COLUMN = "Customer";
 	private static final String CAR_COLUMN = "Car";
 	private static final String START_DATE_COLUMN = "Start Date";
@@ -142,8 +145,8 @@ class RentalTableModelTest {
 
 		assertThat(rentalTableModel.getValueAt(0, 0)).isEqualTo(A_CUSTOMER_FULLNAME);
 		assertThat(rentalTableModel.getValueAt(0, 1)).isEqualTo(A_CAR_DESCRIPTION);
-		assertThat(rentalTableModel.getValueAt(0, 2)).isEqualTo(A_START_DATE);
-		assertThat(rentalTableModel.getValueAt(0, 3)).isEqualTo(AN_END_DATE);
+		assertThat(rentalTableModel.getValueAt(0, 2)).isEqualTo(A_FORMATTED_START_DATE);
+		assertThat(rentalTableModel.getValueAt(0, 3)).isEqualTo(A_FORMATTED_END_DATE);
 		assertThat(rentalTableModel.getValueAt(0, 4)).isEqualTo(A_NUMBER_OF_DAYS);
 		assertThat(rentalTableModel.getValueAt(0, 5)).isEqualTo(A_TOTAL_AMOUNT);
 	}

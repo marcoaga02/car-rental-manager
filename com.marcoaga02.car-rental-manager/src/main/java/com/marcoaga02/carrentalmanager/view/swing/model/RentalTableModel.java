@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing.model;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class RentalTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
 
 	private static final String[] COLUMN_NAMES = { "Customer", "Car", "Start Date", "End Date", "Days", "Total Amount (€)" };
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	private transient List<RentalViewModel> rentals = new ArrayList<>();
 
@@ -52,9 +54,9 @@ public class RentalTableModel extends AbstractTableModel {
 		case 1:
 			return rental.getCarDescription();
 		case 2:
-			return rental.getStartDate();
+			return rental.getStartDate().format(DATE_FORMATTER);
 		case 3:
-			return rental.getEndDate();
+			return rental.getEndDate().format(DATE_FORMATTER);
 		case 4:
 			return rental.getRentalDays();
 		case 5:
