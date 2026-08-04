@@ -52,7 +52,7 @@ class RentalControllerTest {
 	private static final String ANOTHER_CUSTOMER_FULLNAME = "anotherFirstname anotherLastname";
 	private static final String ANOTHER_CAR_DESCRIPTION = "anotherBrand anotherModel [anotherCarPlate]";
 	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = new BigDecimal("123.5");
-	
+
 	private static final Long A_CAR_ID = 12L;
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
@@ -64,7 +64,7 @@ class RentalControllerTest {
 	private static final String ANOTHER_BRAND = "anotherBrand";
 	private static final String ANOTHER_MODEL = "anotherModel";
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
-	
+
 	private static final Long A_CUSTOMER_ID = 14L;
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
 	private static final String A_FIRSTNAME = "aFirstname";
@@ -77,10 +77,10 @@ class RentalControllerTest {
 
 	@Mock
 	private RentalService rentalService;
-	
+
 	@Mock
 	private CarService carService;
-	
+
 	@Mock
 	private CustomerService customerService;
 
@@ -265,10 +265,10 @@ class RentalControllerTest {
 		}
 
 	}
-	
+
 	@Nested
 	class LoadAvailableCars {
-	
+
 		@Test
 		void testLoadAvailableCarsWhenThereAreNoCarsCallsShowAvailableCarsWithEmptyList() {
 			when(carService.getAvailableCars()).thenReturn(Collections.emptyList());
@@ -308,12 +308,12 @@ class RentalControllerTest {
 			inOrder.verify(rentalView).showAvailableCars(List.of(firstCar, secondCar));
 			inOrder.verifyNoMoreInteractions();
 		}
-		
+
 	}
-	
+
 	@Nested
 	class LoadAvailableCustomers {
-		
+
 		@Test
 		void testLoadAvailableCustomersWhenThereAreNoCustomersCallsShowAvailableCustomersWithEmptyList() {
 			when(customerService.getAllCustomers()).thenReturn(Collections.emptyList());
@@ -341,7 +341,8 @@ class RentalControllerTest {
 
 		@Test
 		void testLoadAvailableCustomersWhenThereAreSeveralCustomersCallsShowAvailableCustomersWithAListWithAllElements() {
-			CustomerViewModel firstCustomer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+			CustomerViewModel firstCustomer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME,
+					A_LASTNAME);
 			CustomerViewModel secondCustomer = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE,
 					ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 			when(customerService.getAllCustomers()).thenReturn(List.of(firstCustomer, secondCustomer));
@@ -353,7 +354,7 @@ class RentalControllerTest {
 			inOrder.verify(rentalView).showAvailableCustomers(List.of(firstCustomer, secondCustomer));
 			inOrder.verifyNoMoreInteractions();
 		}
-		
+
 	}
 
 }
