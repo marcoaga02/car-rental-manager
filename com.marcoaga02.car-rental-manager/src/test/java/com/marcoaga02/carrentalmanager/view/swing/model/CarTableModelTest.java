@@ -33,9 +33,13 @@ class CarTableModelTest {
 
 	private CarTableModel carTableModel;
 
+	private CarViewModel car, anotherCar;
+
 	@BeforeEach
 	void setUp() {
 		carTableModel = new CarTableModel();
+		car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
 	}
 
 	@Test
@@ -54,7 +58,8 @@ class CarTableModelTest {
 
 	@Test
 	void testSetCarsWithEmptyListShouldClearTable() {
-		carTableModel.getCars().add(new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		carTableModel.getCars().add(car);
+
 		carTableModel.setCars(List.of());
 
 		assertThat(carTableModel.getCars()).isEmpty();
@@ -62,7 +67,6 @@ class CarTableModelTest {
 
 	@Test
 	void testSetCarsWithAListOfOneElementAddTheElement() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.setCars(List.of(car));
 
 		assertThat(carTableModel.getCars()).containsExactly(car);
@@ -70,75 +74,58 @@ class CarTableModelTest {
 
 	@Test
 	void testSetCarsWithAListOfMultipleElementsAddAllTheElements() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-		carTableModel.setCars(List.of(car1, car2));
+		carTableModel.setCars(List.of(car, anotherCar));
 
-		assertThat(carTableModel.getCars()).containsExactlyInAnyOrder(car1, car2);
+		assertThat(carTableModel.getCars()).containsExactlyInAnyOrder(car, anotherCar);
 	}
 
 	@Test
 	void testSetCarsShouldReplacePreviousCars() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		carTableModel.getCars().add(car1);
+		carTableModel.getCars().add(car);
 
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-		carTableModel.setCars(List.of(car2));
+		carTableModel.setCars(List.of(anotherCar));
 
-		assertThat(carTableModel.getCars()).containsExactly(car2);
+		assertThat(carTableModel.getCars()).containsExactly(anotherCar);
 	}
 
 	@Test
 	void testSetCarsShouldDefensivelyCopyTheGivenList() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		List<CarViewModel> originalList = new ArrayList<>(List.of(car1));
+		List<CarViewModel> originalList = new ArrayList<>(List.of(car));
 
 		carTableModel.setCars(originalList);
 
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-		originalList.add(car2);
+		originalList.add(anotherCar);
 
-		assertThat(carTableModel.getCars()).containsExactly(car1);
+		assertThat(carTableModel.getCars()).containsExactly(car);
 	}
 
 	@Test
 	void testGetCarAtShouldReturnCorrectCar() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
 		List<CarViewModel> cars = carTableModel.getCars();
-		cars.add(car1);
-		cars.add(car2);
+		cars.add(car);
+		cars.add(anotherCar);
 
-		assertThat(carTableModel.getCarAt(1)).isEqualTo(car2);
+		assertThat(carTableModel.getCarAt(1)).isEqualTo(anotherCar);
 	}
 
 	@Test
 	void testGetCarAtWithInvalidIndexShouldThrowIllegalArgumentException() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
 
-		assertThatThrownBy(() -> carTableModel.getCarAt(4))
-				.isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> carTableModel.getCarAt(4)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid row: 4");
 	}
-	
+
 	@Test
 	void testGetCarAtWithInvalidBoundaryIndexShouldThrowIllegalArgumentException() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
 
-		assertThatThrownBy(() -> carTableModel.getCarAt(1))
-				.isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> carTableModel.getCarAt(1)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid row: 1");
 	}
 
 	@Test
 	void testGetValueAtShouldReturnCorrectValues() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
 
 		assertThat(carTableModel.getValueAt(0, 0)).isEqualTo(A_CAR_PLATE);
@@ -149,31 +136,25 @@ class CarTableModelTest {
 
 	@Test
 	void testGetValueAtWithInvalidColumnShouldThrowIllegalArgumentException() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
 
-		assertThatThrownBy(() -> carTableModel.getValueAt(0, 4))
-				.isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> carTableModel.getValueAt(0, 4)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid column: 4");
 	}
-	
+
 	@Test
 	void testGetValueAtWithInvalidRowShouldThrowIllegalArgumentException() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
-		
-		assertThatThrownBy(() -> carTableModel.getValueAt(4, 0))
-				.isInstanceOf(IllegalArgumentException.class)
+
+		assertThatThrownBy(() -> carTableModel.getValueAt(4, 0)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid row: 4");
 	}
 
 	@Test
 	void testGetValueAtWithInvalidBoundaryRowShouldThrowIllegalArgumentException() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		carTableModel.getCars().add(car);
-		
-		assertThatThrownBy(() -> carTableModel.getValueAt(1, 0))
-				.isInstanceOf(IllegalArgumentException.class)
+
+		assertThatThrownBy(() -> carTableModel.getValueAt(1, 0)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid row: 1");
 	}
 
