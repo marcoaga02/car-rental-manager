@@ -28,6 +28,7 @@ import com.marcoaga02.carrentalmanager.controller.CarController;
 import com.marcoaga02.carrentalmanager.view.CarView;
 import com.marcoaga02.carrentalmanager.view.swing.model.CarTableModel;
 import com.marcoaga02.carrentalmanager.viewmodel.CarViewModel;
+import javax.swing.SwingConstants;
 
 public class CarPanel extends JPanel implements CarView, ActivablePanel {
 
@@ -106,11 +107,17 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		add(rightPanel, BorderLayout.EAST);
 		rightPanel.setLayout(new BorderLayout(0, 0));
 
+		createCarTitleLabel = new JLabel("Create Car");
+		createCarTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		createCarTitleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));
+		rightPanel.add(createCarTitleLabel, BorderLayout.NORTH);
+		createCarTitleLabel.setFont(getFont().deriveFont(Font.BOLD));
+
 		fieldPanel = new JPanel();
 		rightPanel.add(fieldPanel, BorderLayout.CENTER);
 		fieldPanel.setBorder(new EmptyBorder(5, 5, 0, 5));
 		GridBagLayout gbl_fieldPanel = new GridBagLayout();
-		gbl_fieldPanel.columnWidths = new int[] { 0, 0 };
+		gbl_fieldPanel.columnWidths = new int[] { 160, 0 };
 		gbl_fieldPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_fieldPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gbl_fieldPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
@@ -136,7 +143,6 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		gbc_textFieldCarPlate.gridx = 0;
 		gbc_textFieldCarPlate.gridy = 1;
 		fieldPanel.add(carPlateTextField, gbc_textFieldCarPlate);
-		carPlateTextField.setColumns(15);
 
 		brandLabel = new JLabel("Brand");
 		brandLabel.setForeground(Color.DARK_GRAY);
@@ -158,7 +164,6 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		gbc_textFieldBrand.gridx = 0;
 		gbc_textFieldBrand.gridy = 3;
 		fieldPanel.add(brandTextField, gbc_textFieldBrand);
-		brandTextField.setColumns(15);
 
 		modelLabel = new JLabel("Model");
 		modelLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
@@ -179,7 +184,6 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		gbc_textFieldModel.gridx = 0;
 		gbc_textFieldModel.gridy = 5;
 		fieldPanel.add(modelTextField, gbc_textFieldModel);
-		modelTextField.setColumns(15);
 
 		dailyRateLabel = new JLabel("Daily rate (€)");
 		dailyRateLabel.setForeground(Color.DARK_GRAY);
@@ -237,11 +241,6 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 		addCarButton.addActionListener(e -> carController.createCar(
 				new CarViewModel(null, carPlateTextField.getText(), brandTextField.getText(), modelTextField.getText(),
 						BigDecimal.valueOf(((Number) dailyRateSpinner.getValue()).doubleValue()))));
-
-		createCarTitleLabel = new JLabel("Create Car");
-		createCarTitleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));
-		rightPanel.add(createCarTitleLabel, BorderLayout.NORTH);
-		createCarTitleLabel.setFont(getFont().deriveFont(Font.BOLD));
 	}
 
 	@Override
