@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
 	private CustomerPanel customerPanel;
 	private RentalPanel rentalPanel;
 
-	private Map<Integer, ActivablePanel> activablePanelsByIndex;
+	private transient Map<Integer, ActivablePanel> activablePanelsByIndex;
 
 	/**
 	 * Create the frame.

@@ -35,9 +35,11 @@ import com.marcoaga02.carrentalmanager.viewmodel.RentalViewModel;
 
 public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 
+	private static final String DIALOG_FONT = "Dialog";
+
 	private static final long serialVersionUID = 1L;
 
-	private RentalController rentalController;
+	private transient RentalController rentalController;
 
 	private JTable rentalTable;
 	private RentalTableModel rentalTableModel;
@@ -124,7 +126,7 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 
 		carLabel = new JLabel("Car");
 		carLabel.setForeground(Color.DARK_GRAY);
-		carLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		carLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		GridBagConstraints gbc_carLabel = new GridBagConstraints();
 		gbc_carLabel.gridwidth = 1;
 		gbc_carLabel.anchor = GridBagConstraints.WEST;
@@ -160,7 +162,7 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 
 		customerLabel = new JLabel("Customer");
 		customerLabel.setForeground(Color.DARK_GRAY);
-		customerLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		customerLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		GridBagConstraints gbc_customerLabel = new GridBagConstraints();
 		gbc_customerLabel.gridwidth = 1;
 		gbc_customerLabel.anchor = GridBagConstraints.WEST;
@@ -196,7 +198,7 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 
 		rentalDaysLabel = new JLabel("Rental days");
 		rentalDaysLabel.setForeground(Color.DARK_GRAY);
-		rentalDaysLabel.setFont(new Font("Dialog", Font.PLAIN, 10));
+		rentalDaysLabel.setFont(new Font(DIALOG_FONT, Font.PLAIN, 10));
 		GridBagConstraints gbc_rentalDaysLabel = new GridBagConstraints();
 		gbc_rentalDaysLabel.anchor = GridBagConstraints.WEST;
 		gbc_rentalDaysLabel.insets = new Insets(0, 0, 5, 0);
