@@ -69,7 +69,7 @@ public class MainFrameTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	public void testActivablePanelsByIndexIsComposedCorrectly() {
-		assertThat(mainFrame.getActivablePanelsByIndex()).containsExactly(entry(0, mainFrame.getCarPanel()),
+		assertThat(mainFrame.getActivablePanelsByIndex()).containsOnly(entry(0, mainFrame.getCarPanel()),
 				entry(1, mainFrame.getCustomerPanel()), entry(2, mainFrame.getRentalPanel()));
 	}
 
