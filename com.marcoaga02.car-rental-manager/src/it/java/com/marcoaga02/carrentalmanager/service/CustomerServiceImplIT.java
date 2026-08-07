@@ -22,7 +22,7 @@ import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 import com.marcoaga02.carrentalmanager.transaction.jpa.TransactionManagerJpa;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
-public class CustomerServiceImplIT extends BasePostgresTest {
+class CustomerServiceImplIT extends BasePostgresTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
 	private static final String A_BRAND = "aBrand";
