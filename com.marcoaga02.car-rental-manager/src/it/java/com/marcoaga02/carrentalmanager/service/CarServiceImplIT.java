@@ -33,7 +33,7 @@ class CarServiceImplIT extends BasePostgresTest {
 	private static final String ANOTHER_BRAND = "anotherBrand";
 	private static final String ANOTHER_MODEL = "anotherModel";
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(50.2);
-	
+
 	private static final String A_DELETED_CAR_PLATE = "aDeletedCarPlate";
 
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
@@ -67,7 +67,6 @@ class CarServiceImplIT extends BasePostgresTest {
 		assertThat(result).hasSize(2).extracting(CarViewModel::getId).containsExactlyInAnyOrder(availableCar.getId(),
 				rentedCar.getId());
 	}
-	
 
 	@Test
 	void testCreateCarPersistsTheCarAndReturnsItsGeneratedId() {
