@@ -19,7 +19,7 @@ public class Car extends BaseEntity {
 	@Column(nullable = false)
 	private String model;
 
-	@Column(name = "daily_rate", nullable = false)
+	@Column(name = "daily_rate", nullable = false, precision = 19, scale = 1)
 	private BigDecimal dailyRate;
 
 	@Column(nullable = false)
