@@ -147,7 +147,7 @@ public class CarPanelIT extends BaseSwingIT {
 	@Test
 	@GUITest
 	public void testDeleteCarSoftDeletesInDatabaseAndRemovesFromTable() {
-		Car deletedCar = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		Car car = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
 		persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
 
 		GuiActionRunner.execute(() -> carPanel.onActivate());
@@ -159,7 +159,7 @@ public class CarPanelIT extends BaseSwingIT {
 		assertThat(contents).isDeepEqualTo(
 				new String[][] { { ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
 
-		Car persisted = entityManager.find(Car.class, deletedCar.getId());
+		Car persisted = entityManager.find(Car.class, car.getId());
 		assertThat(persisted.getDeleted()).isTrue();
 	}
 
@@ -187,7 +187,7 @@ public class CarPanelIT extends BaseSwingIT {
 	}
 
 	private Car persistDeletedCar() {
-		Car deletedCar = new Car("deletedPlate", "aBrand", "aModel", BigDecimal.valueOf(10.0));
+		Car deletedCar = new Car("aDeletedPlate", "aBrand", "aModel", BigDecimal.valueOf(10.0));
 		return persistCar(deletedCar, true);
 	}
 
