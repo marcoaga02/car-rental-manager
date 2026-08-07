@@ -33,6 +33,8 @@ class CarServiceImplIT extends BasePostgresTest {
 	private static final String ANOTHER_BRAND = "anotherBrand";
 	private static final String ANOTHER_MODEL = "anotherModel";
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(50.2);
+	
+	private static final String A_DELETED_CAR_PLATE = "aDeletedCarPlate";
 
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
 	private static final String A_FIRSTNAME = "aFirstname";
@@ -54,6 +56,7 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testGetAllCarsIncludesAllActiveCars() {
+		persistDeletedCar(new Car(A_DELETED_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
 		Car availableCar = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
 		Car rentedCar = persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
 		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
@@ -64,6 +67,7 @@ class CarServiceImplIT extends BasePostgresTest {
 		assertThat(result).hasSize(2).extracting(CarViewModel::getId).containsExactlyInAnyOrder(availableCar.getId(),
 				rentedCar.getId());
 	}
+	
 
 	@Test
 	void testCreateCarPersistsTheCarAndReturnsItsGeneratedId() {
