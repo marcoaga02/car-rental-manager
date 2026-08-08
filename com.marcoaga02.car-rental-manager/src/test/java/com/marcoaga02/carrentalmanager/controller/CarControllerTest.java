@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,14 @@ class CarControllerTest {
 	@InjectMocks
 	private CarController carController;
 
+	private CarViewModel car, anotherCar;
+
+	@BeforeEach
+	void setUp() {
+		car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+	}
+
 	@Nested
 	class GetAllCars {
 
@@ -67,7 +76,6 @@ class CarControllerTest {
 
 		@Test
 		void testGetAllCarsWhenThereIsOnlyOneCarCallsShowAllCarsWithAListWithOneElement() {
-			CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 			when(carService.getAllCars()).thenReturn(List.of(car));
 
 			carController.getAllCars();
@@ -80,16 +88,13 @@ class CarControllerTest {
 
 		@Test
 		void testGetAllCarsWhenThereAreSeveralCarsCallsShowAllCarsWithAListWithAllElements() {
-			CarViewModel firstCar = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			CarViewModel secondCar = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-					ANOTHER_DAILY_RATE);
-			when(carService.getAllCars()).thenReturn(List.of(firstCar, secondCar));
+			when(carService.getAllCars()).thenReturn(List.of(car, anotherCar));
 
 			carController.getAllCars();
 
 			InOrder inOrder = inOrder(carService, carView);
 			inOrder.verify(carService).getAllCars();
-			inOrder.verify(carView).showAllCars(List.of(firstCar, secondCar));
+			inOrder.verify(carView).showAllCars(List.of(car, anotherCar));
 			inOrder.verifyNoMoreInteractions();
 		}
 
@@ -100,28 +105,26 @@ class CarControllerTest {
 
 		@Test
 		void testCreateCarWhenSuccessfulRefreshesTheCarList() {
-			CarViewModel request = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			when(carService.getAllCars()).thenReturn(List.of(request));
+			when(carService.getAllCars()).thenReturn(List.of(car));
 
-			carController.createCar(request);
+			carController.createCar(car);
 
 			InOrder inOrder = inOrder(carService, carView);
-			inOrder.verify(carService).createCar(request);
+			inOrder.verify(carService).createCar(car);
 			inOrder.verify(carView).clearFields();
 			inOrder.verify(carService).getAllCars();
-			inOrder.verify(carView).showAllCars(List.of(request));
+			inOrder.verify(carView).showAllCars(List.of(car));
 			inOrder.verifyNoMoreInteractions();
 		}
 
 		@Test
 		void testCreateCarWhenDuplicateCarPlateShowsErrorAndDoesNotRefreshList() {
-			CarViewModel request = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 			DuplicateCarPlateException exception = new DuplicateCarPlateException(A_CAR_PLATE);
-			doThrow(exception).when(carService).createCar(request);
+			doThrow(exception).when(carService).createCar(car);
 
-			carController.createCar(request);
+			carController.createCar(car);
 
-			verify(carService).createCar(request);
+			verify(carService).createCar(car);
 			verify(carView).showError(exception.getMessage());
 			verify(carView, never()).clearFields();
 			verify(carService, never()).getAllCars();
@@ -150,7 +153,6 @@ class CarControllerTest {
 
 		@Test
 		void testDeleteCarWhenSuccessfulRefreshesTheCarList() {
-			CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 			when(carService.getAllCars()).thenReturn(List.of(car));
 
 			carController.deleteCar(ANOTHER_ID);

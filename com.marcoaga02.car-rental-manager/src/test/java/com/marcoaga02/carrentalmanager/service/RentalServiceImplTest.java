@@ -96,18 +96,15 @@ class RentalServiceImplTest {
 	private static final String ANOTHER_FULLNAME = "anotherFullname";
 
 	private static final Long A_RENTAL_ID = 5L;
-	private static final Long ANOTHER_RENTAL_ID = 6L;
-
 	private static final Integer A_NUMBER_OF_DAYS = 6;
-	private static final Integer ANOTHER_NUMBER_OF_DAYS = 3;
-
 	private static final LocalDate A_START_DATE = LocalDate.parse("2026-05-10");
-	private static final LocalDate ANOTHER_START_DATE = LocalDate.parse("2026-06-20");
-
 	private static final LocalDate AN_END_DATE = LocalDate.parse("2026-05-16");
-	private static final LocalDate ANOTHER_END_DATE = LocalDate.parse("2026-06-23");
-
 	private static final BigDecimal A_TOTAL_AMOUNT = BigDecimal.valueOf(61.2);
+
+	private static final Long ANOTHER_RENTAL_ID = 6L;
+	private static final Integer ANOTHER_NUMBER_OF_DAYS = 3;
+	private static final LocalDate ANOTHER_START_DATE = LocalDate.parse("2026-06-20");
+	private static final LocalDate ANOTHER_END_DATE = LocalDate.parse("2026-06-23");
 	private static final BigDecimal ANOTHER_TOTAL_AMOUNT = BigDecimal.valueOf(12.9);
 
 	private final Clock fixedClock = Clock.fixed(A_START_DATE.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
@@ -115,8 +112,9 @@ class RentalServiceImplTest {
 	private Rental rental, anotherRental;
 	private RentalViewModel rentalViewModel, anotherRentalViewModel;
 
-	private Car car;
+	private RentalCreationRequest creationRequest;
 
+	private Car car;
 	private Customer customer;
 
 	@BeforeEach
@@ -134,6 +132,8 @@ class RentalServiceImplTest {
 		anotherRental = new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE, ANOTHER_NUMBER_OF_DAYS);
 		anotherRentalViewModel = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
 				ANOTHER_NUMBER_OF_DAYS, ANOTHER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
+
+		creationRequest = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 	}
 
 	// Required by the strict stubbing of MockitoExtension
@@ -273,8 +273,6 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenInputIsValidAddTheNewRental() {
 			fullStubTransaction();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
-
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
 			when(rentalRepository.existsActiveByCarId(A_CAR_ID)).thenReturn(false);
@@ -283,7 +281,7 @@ class RentalServiceImplTest {
 			when(rentalRepository.save(any(Rental.class))).thenReturn(savedRental);
 			when(rentalMapper.toViewModel(savedRental)).thenReturn(rentalViewModel);
 
-			RentalViewModel result = rentalService.createRental(request);
+			RentalViewModel result = rentalService.createRental(creationRequest);
 
 			assertThat(result).isEqualTo(rentalViewModel);
 
@@ -308,12 +306,10 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenCarIdIsInvalidThrowsCarNotFoundException() {
 			stubTransaction().withCarRepository();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
-
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CarNotFoundException.class)
-					.hasMessage("Car with id '" + A_CAR_ID + "' not found");
+			assertThatThrownBy(() -> rentalService.createRental(creationRequest))
+					.isInstanceOf(CarNotFoundException.class).hasMessage("Car with id '" + A_CAR_ID + "' not found");
 
 			verify(carRepository).findActiveById(A_CAR_ID);
 			verifyNoMoreInteractions(carRepository);
@@ -324,12 +320,11 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenCustomerIdIsInvalidThrowsCustomerNotFoundException() {
 			stubTransaction().withCarRepository().withCustomerRepository();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
-
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CustomerNotFoundException.class)
+			assertThatThrownBy(() -> rentalService.createRental(creationRequest))
+					.isInstanceOf(CustomerNotFoundException.class)
 					.hasMessage("Customer with id '" + A_CUSTOMER_ID + "' not found");
 
 			verify(carRepository).findActiveById(A_CAR_ID);
@@ -342,13 +337,12 @@ class RentalServiceImplTest {
 		void testCreateRentalWhenTheCarIsAlreadyRentedThrowCarAlreadyRentedException() {
 			fullStubTransaction();
 
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
-
 			when(carRepository.findActiveById(A_CAR_ID)).thenReturn(Optional.of(car));
 			when(customerRepository.findActiveById(A_CUSTOMER_ID)).thenReturn(Optional.of(customer));
 			when(rentalRepository.existsActiveByCarId(A_CAR_ID)).thenReturn(true);
 
-			assertThatThrownBy(() -> rentalService.createRental(request)).isInstanceOf(CarAlreadyRentedException.class)
+			assertThatThrownBy(() -> rentalService.createRental(creationRequest))
+					.isInstanceOf(CarAlreadyRentedException.class)
 					.hasMessage("Car with id '" + A_CAR_ID + "' is already rented");
 
 			verify(carRepository).findActiveById(A_CAR_ID);

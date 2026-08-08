@@ -38,6 +38,8 @@ class CustomerServiceImplIT extends BasePostgresTest {
 	private static final String ANOTHER_LASTNAME = "anotherLastname";
 
 	private static final String A_DELETED_TAX_ID_CODE = "aDeletedTaxIdCode";
+	private static final String A_DELETED_FIRSTNAME = "aDeletedFirstname";
+	private static final String A_DELETED_LASTNAME = "aDeletedLastname";
 
 	private static final LocalDate TODAY = LocalDate.parse("2026-05-10");
 
@@ -45,25 +47,34 @@ class CustomerServiceImplIT extends BasePostgresTest {
 
 	private final Clock fixedClock = Clock.fixed(TODAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
+	private Customer customer, anotherCustomer;
+	private Car car;
+
 	private CustomerService customerService;
 
 	@BeforeEach
 	void setUp() {
 		TransactionManagerJpa transactionManager = new TransactionManagerJpa(entityManagerFactory, fixedClock);
 		customerService = new CustomerServiceImpl(transactionManager, new CustomerMapper());
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 	}
 
 	@Test
 	void testGetAllCustomersIncludesAllActiveCustomers() {
-		persistDeletedCustomer(new Customer(A_DELETED_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Customer customer1 = persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Customer customer2 = persistActiveCustomer(
-				new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCar(car);
+		persistDeletedCustomer();
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
+		persistRental(new Rental(car, anotherCustomer, TODAY, A_NUMBER_OF_DAYS));
 
 		List<CustomerViewModel> result = customerService.getAllCustomers();
 
-		assertThat(result).hasSize(2).extracting(CustomerViewModel::getId).containsExactlyInAnyOrder(customer1.getId(),
-				customer2.getId());
+		assertThat(result).hasSize(2).extracting(CustomerViewModel::getId).containsExactlyInAnyOrder(customer.getId(),
+				anotherCustomer.getId());
 	}
 
 	@Test
@@ -83,19 +94,19 @@ class CustomerServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testCreateCustomerThrowsDuplicateTaxIdCodeExceptionWhenAnActiveCustomerWithTheSameTaxIdCodeAlreadyExists() {
-		persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		CustomerViewModel customer = new CustomerViewModel(null, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		persistCustomer(customer);
+		CustomerViewModel request = new CustomerViewModel(null, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 
-		assertThatThrownBy(() -> customerService.createCustomer(customer))
+		assertThatThrownBy(() -> customerService.createCustomer(request))
 				.isInstanceOf(DuplicateTaxIdCodeException.class);
 	}
 
 	@Test
 	void testCreateCustomerDoesNotConsiderDeletedCustomersAsDuplicatesAndCreatesANewElement() {
-		Customer deletedCustomer = persistDeletedCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		Customer deletedCustomer = persistDeletedCustomer();
 
 		CustomerViewModel result = customerService
-				.createCustomer(new CustomerViewModel(null, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+				.createCustomer(new CustomerViewModel(null, A_DELETED_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
 
 		assertThat(result.getId()).isNotNull();
 		assertThat(deletedCustomer.getId()).isNotNull().isNotEqualTo(result.getId());
@@ -103,7 +114,7 @@ class CustomerServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testDeleteCustomerSoftDeletesTheCustomerWhenItIsNotRented() {
-		Customer customer = persistActiveCustomer(new Customer(ANOTHER_FIRSTNAME, A_FIRSTNAME, A_LASTNAME));
+		persistCustomer(customer);
 		Long customerId = customer.getId();
 
 		customerService.deleteCustomer(customerId);
@@ -114,8 +125,8 @@ class CustomerServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testDeleteCustomerThrowsCustomerHasActiveRentalExceptionWhenTheCustomerHasAnActiveRental() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 		persistRental(new Rental(car, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		Long customerId = customer.getId();
@@ -127,16 +138,13 @@ class CustomerServiceImplIT extends BasePostgresTest {
 		assertThat(persisted.getDeleted()).isFalse();
 	}
 
-	private Customer persistActiveCustomer(Customer customer) {
-		return persistCustomer(customer, false);
+	private Customer persistDeletedCustomer() {
+		Customer deletedCustomer = new Customer(A_DELETED_TAX_ID_CODE, A_DELETED_FIRSTNAME, A_DELETED_LASTNAME);
+		deletedCustomer.setDeleted(true);
+		return persistCustomer(deletedCustomer);
 	}
 
-	private Customer persistDeletedCustomer(Customer customer) {
-		return persistCustomer(customer, true);
-	}
-
-	private Customer persistCustomer(Customer customer, boolean deleted) {
-		customer.setDeleted(deleted);
+	private Customer persistCustomer(Customer customer) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(customer);
 		entityManager.getTransaction().commit();

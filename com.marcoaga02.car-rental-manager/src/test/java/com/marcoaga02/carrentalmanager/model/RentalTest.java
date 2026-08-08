@@ -23,36 +23,34 @@ class RentalTest {
 	private static final LocalDate A_START_DATE = LocalDate.of(2026, Month.JULY, 25);
 	private static final Integer A_NUMBER_OF_DAYS = 6;
 
-	private Rental rental;
+	private Rental rental, anotherRental;
 
 	@BeforeEach
 	void setUp() {
 		Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+
 		rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+		anotherRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
-		other.setUuid(rental.getUuid());
+		anotherRental.setUuid(rental.getUuid());
 
-		assertThat(rental.equals(other)).isTrue();
+		assertThat(rental.equals(anotherRental)).isTrue();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
-
-		assertThat(rental.equals(other)).isFalse();
+		assertThat(rental.equals(anotherRental)).isFalse();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Rental other = new Rental(rental.getCar(), rental.getCustomer(), A_START_DATE, A_NUMBER_OF_DAYS);
-		other.setUuid(rental.getUuid());
+		anotherRental.setUuid(rental.getUuid());
 
-		assertThat(other).hasSameHashCodeAs(rental);
+		assertThat(anotherRental).hasSameHashCodeAs(rental);
 	}
 
 }

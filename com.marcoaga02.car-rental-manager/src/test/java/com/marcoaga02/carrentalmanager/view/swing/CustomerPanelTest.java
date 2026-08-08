@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.marcoaga02.carrentalmanager.controller.CustomerController;
+import com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
 @RunWith(GUITestRunner.class)
@@ -57,6 +58,8 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 
 	private AutoCloseable closeable;
 
+	private CustomerViewModel customer, anotherCustomer;
+
 	@Override
 	protected void onSetUp() throws Exception {
 		closeable = MockitoAnnotations.openMocks(this);
@@ -66,6 +69,9 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 			return panel;
 		});
 		window = showInFrame(robot(), customerPanel);
+
+		customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 	}
 
 	@Override
@@ -97,18 +103,14 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testShowAllCustomersShouldAddCustomersToTheTable() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-
 		GuiActionRunner.execute(() -> {
 			customerPanel.getErrorLabel().setText("error message");
-			customerPanel.showAllCustomers(List.of(customer1, customer2));
+			customerPanel.showAllCustomers(List.of(customer, anotherCustomer));
 		});
 
-		String[][] tableContents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(tableContents).isDeepEqualTo(new String[][] { { A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME },
-				{ ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(TableAssertionUtils.rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}
@@ -190,7 +192,6 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCustomerButtonDisabledWhenNoTableRowIsSelected() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		GuiActionRunner.execute(() -> customerPanel.getCustomerTableModel().setCustomers(List.of(customer)));
 
 		window.table(CUSTOMER_TABLE).selectRows(0);
@@ -202,7 +203,6 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCustomerButtonEnabledWhenATableRowIsSelected() {
-		CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 		GuiActionRunner.execute(() -> customerPanel.getCustomerTableModel().setCustomers(List.of(customer)));
 
 		window.table(CUSTOMER_TABLE).selectRows(0);
@@ -240,11 +240,8 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCustomerButtonShouldDelegateToCustomerControllerDeleteCustomer() {
-		CustomerViewModel customer1 = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
 		GuiActionRunner
-				.execute(() -> customerPanel.getCustomerTableModel().setCustomers(List.of(customer1, customer2)));
+				.execute(() -> customerPanel.getCustomerTableModel().setCustomers(List.of(customer, anotherCustomer)));
 
 		window.table(CUSTOMER_TABLE).selectRows(1);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();

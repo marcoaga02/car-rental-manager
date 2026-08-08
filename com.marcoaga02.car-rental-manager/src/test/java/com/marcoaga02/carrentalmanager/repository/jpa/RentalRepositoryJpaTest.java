@@ -54,17 +54,32 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 	private static final LocalDate EXPIRED_START_DATE = TODAY.minusDays(30);
 	private static final Integer EXPIRED_NUMBER_OF_DAYS = 5;
 
-	private static final LocalDate BOUNDARY_START_DATE = TODAY.minusDays(5);
-	private static final Integer BOUNDARY_NUMBER_OF_DAYS = 5;
+	private static final LocalDate BOUNDARY_EXPIRED_START_DATE = TODAY.minusDays(5);
+	private static final Integer BOUNDARY_EXPIRED_NUMBER_OF_DAYS = 5;
 
-	private static final LocalDate ALMOST_EXPIRED_START_DATE = TODAY;
-	private static final Integer ALMOST_EXPIRED_NUMBER_OF_DAYS = 1;
+	private static final LocalDate BOUNDARY_ACTIVE_START_DATE = TODAY;
+	private static final Integer BOUNDARY_ACTIVE_NUMBER_OF_DAYS = 1;
 
 	private RentalRepositoryJpa rentalRepository;
+	private Car car, anotherCar;
+	private Customer customer, anotherCustomer;
+	private Rental activeRental, anotherActiveRental, boundaryActiveRental, boundaryExpiredRental, expiredRental;
 
 	@BeforeEach
 	void setUp() {
 		rentalRepository = new RentalRepositoryJpa(entityManager, fixedClock);
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+
+		activeRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+		anotherActiveRental = new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE, ANOTHER_NUMBER_OF_DAYS);
+		boundaryActiveRental = new Rental(car, customer, BOUNDARY_ACTIVE_START_DATE, BOUNDARY_ACTIVE_NUMBER_OF_DAYS);
+		boundaryExpiredRental = new Rental(car, customer, BOUNDARY_EXPIRED_START_DATE, BOUNDARY_EXPIRED_NUMBER_OF_DAYS);
+		expiredRental = new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS);
 	}
 
 	@Nested
@@ -79,7 +94,9 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenThereIsAnExpiredRentalReturnsAnEmptyList() {
-			persistExpiredRental();
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(expiredRental);
 
 			List<Rental> result = rentalRepository.findAllActive();
 
@@ -88,9 +105,9 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenRentalEndsExactlyTodayIsConsideredExpired() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, BOUNDARY_START_DATE, BOUNDARY_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryExpiredRental);
 
 			List<Rental> result = rentalRepository.findAllActive();
 
@@ -99,44 +116,41 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenRentalEndsTomorrowIsConsideredActive() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(
-					new Rental(car, customer, ALMOST_EXPIRED_START_DATE, ALMOST_EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryActiveRental);
 
 			List<Rental> result = rentalRepository.findAllActive();
 
-			assertThat(result).hasSize(1).containsExactly(rental);
+			assertThat(result).hasSize(1).containsExactly(boundaryActiveRental);
 		}
 
 		@Test
 		void testFindAllActiveWhenThereIsOnlyOneActiveRentalReturnsAListWithASingleElement() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			List<Rental> result = rentalRepository.findAllActive();
 
-			assertThat(result).hasSize(1).containsExactly(rental);
+			assertThat(result).hasSize(1).containsExactly(activeRental);
 		}
 
 		@Test
 		void testFindAllActiveWhenThereAreMultipleActiveRentalsReturnAListWithAllActiveElements() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
-			Car anotherCar = persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
-			Customer anotherCustomer = persistCustomer(
-					new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
-			Rental anotherRental = persistRental(
-					new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE, ANOTHER_NUMBER_OF_DAYS));
+			persistCar(anotherCar);
+			persistCustomer(anotherCustomer);
+			persistRental(anotherActiveRental);
 
-			persistExpiredRental();
+			persistRental(expiredRental);
 
 			List<Rental> result = rentalRepository.findAllActive();
 
-			assertThat(result).hasSize(2).containsExactlyInAnyOrder(rental, anotherRental);
+			assertThat(result).hasSize(2).containsExactlyInAnyOrder(activeRental, anotherActiveRental);
 		}
 
 	}
@@ -151,58 +165,56 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByCarIdWhenNoActiveRentalWithCarIdIsFoundReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(Long.MAX_VALUE)).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCarIdWhenRentalIsExpiredBySeveralDaysReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(expiredRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(car.getId())).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCarIdWhenRentalEndsExactlyTodayIsConsideredExpiredAndReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, BOUNDARY_START_DATE, BOUNDARY_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryExpiredRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(car.getId())).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCarIdWhenRentalEndsTomorrowIsConsideredActiveAndReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, ALMOST_EXPIRED_START_DATE, ALMOST_EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryActiveRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(car.getId())).isTrue();
 		}
 
 		@Test
 		void testFindActiveByCarIdWhenRentalIsActiveReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(car.getId())).isTrue();
 		}
 
 		@Test
 		void testFindActiveByCarIdWhenThereIsAnExpiredAndAnActiveRentalForSameCarReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Customer anotherCustomer = persistCustomer(
-					new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+			persistCar(car);
+			persistCustomer(customer);
 
-			persistRental(new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS));
-			persistRental(new Rental(car, anotherCustomer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistRental(expiredRental);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCarId(car.getId())).isTrue();
 		}
@@ -219,57 +231,56 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByCustomerIdWhenNoActiveRentalWithCustomerIdIsFoundReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(Long.MAX_VALUE)).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCustomerIdWhenRentalIsExpiredBySeveralDaysReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(expiredRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(customer.getId())).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCustomerIdWhenRentalEndsExactlyTodayIsConsideredExpiredAndReturnsFalse() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, BOUNDARY_START_DATE, BOUNDARY_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryExpiredRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(customer.getId())).isFalse();
 		}
 
 		@Test
 		void testFindActiveByCustomerIdWhenRentalEndsTomorrowIsConsideredActiveAndReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, ALMOST_EXPIRED_START_DATE, ALMOST_EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryActiveRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(customer.getId())).isTrue();
 		}
 
 		@Test
 		void testFindActiveByCustomerIdWhenRentalIsActiveReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(customer.getId())).isTrue();
 		}
 
 		@Test
 		void testFindActiveByCustomerIdWhenThereIsAnExpiredAndAnActiveRentalForSameCustomerReturnsTrue() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Car anotherCar = persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+			persistCar(car);
+			persistCustomer(customer);
 
-			persistRental(new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS));
-			persistRental(new Rental(anotherCar, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistRental(expiredRental);
+			persistRental(activeRental);
 
 			assertThat(rentalRepository.existsActiveByCustomerId(customer.getId())).isTrue();
 		}
@@ -288,9 +299,9 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenNoActiveRentalWithIdIsFoundReturnsEmpty() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			Optional<Rental> result = rentalRepository.findActiveById(Long.MAX_VALUE);
 
@@ -299,47 +310,46 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenRentalIsExpiredBySeveralDaysReturnsEmptyOptional() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(expiredRental);
 
-			Optional<Rental> result = rentalRepository.findActiveById(rental.getId());
+			Optional<Rental> result = rentalRepository.findActiveById(expiredRental.getId());
 
 			assertThat(result).isEmpty();
 		}
 
 		@Test
 		void testFindActiveByIdWhenRentalEndsExactlyTodayIsConsideredExpired() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, BOUNDARY_START_DATE, BOUNDARY_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryExpiredRental);
 
-			Optional<Rental> result = rentalRepository.findActiveById(rental.getId());
+			Optional<Rental> result = rentalRepository.findActiveById(boundaryExpiredRental.getId());
 
 			assertThat(result).isEmpty();
 		}
 
 		@Test
 		void testFindActiveByIdWhenRentalEndsTomorrowIsConsideredActive() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(
-					new Rental(car, customer, ALMOST_EXPIRED_START_DATE, ALMOST_EXPIRED_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(boundaryActiveRental);
 
-			Optional<Rental> result = rentalRepository.findActiveById(rental.getId());
+			Optional<Rental> result = rentalRepository.findActiveById(boundaryActiveRental.getId());
 
-			assertThat(result).contains(rental);
+			assertThat(result).contains(boundaryActiveRental);
 		}
 
 		@Test
 		void testFindActiveByIdWhenRentalIsActiveReturnsOptionalWithRental() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
-			Optional<Rental> result = rentalRepository.findActiveById(rental.getId());
+			Optional<Rental> result = rentalRepository.findActiveById(activeRental.getId());
 
-			assertThat(result).contains(rental);
+			assertThat(result).contains(activeRental);
 		}
 
 	}
@@ -349,16 +359,15 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testSaveWhenRentalIsNewPersistsItAndReturnsItWithGeneratedId() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+			persistCar(car);
+			persistCustomer(customer);
 
 			entityManager.getTransaction().begin();
-			Rental result = rentalRepository.save(rental);
+			Rental result = rentalRepository.save(activeRental);
 			entityManager.getTransaction().commit();
 
 			assertThat(result).extracting(Rental::getId, Rental::getStartDate, Rental::getDays)
-					.containsExactly(rental.getId(), A_START_DATE, A_NUMBER_OF_DAYS);
+					.containsExactly(activeRental.getId(), A_START_DATE, A_NUMBER_OF_DAYS);
 
 			assertThat(result.getCar())
 					.extracting(Car::getId, Car::getCarPlate, Car::getBrand, Car::getModel, Car::getDailyRate)
@@ -372,32 +381,33 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testSaveWhenRentalIsNewCanBeRetrievedDirectlyFromDatabase() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
+			persistCar(car);
+			persistCustomer(customer);
 
 			entityManager.getTransaction().begin();
-			rentalRepository.save(rental);
+			rentalRepository.save(activeRental);
 			entityManager.getTransaction().commit();
 
 			entityManager.clear();
 
-			Rental reloaded = entityManager.find(Rental.class, rental.getId());
+			Rental reloaded = entityManager.find(Rental.class, activeRental.getId());
 
-			assertThat(reloaded).isEqualTo(rental);
+			assertThat(reloaded).isEqualTo(activeRental);
 		}
 
 		@Test
 		void testSaveWhenRentalAlreadyExistsIsIdempotentAndReturnsSameData() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+			persistCar(car);
+			persistCustomer(customer);
+			persistRental(activeRental);
 
 			entityManager.getTransaction().begin();
-			Rental result = rentalRepository.save(rental);
+			Rental result = rentalRepository.save(activeRental);
 			entityManager.getTransaction().commit();
 
-			assertThat(result.getId()).isEqualTo(rental.getId());
+			assertThat(result.getId()).isEqualTo(activeRental.getId());
+			assertThat(result.getCar()).isEqualTo(car);
+			assertThat(result.getCustomer()).isEqualTo(customer);
 			assertThat(result.getStartDate()).isEqualTo(A_START_DATE);
 			assertThat(result.getDays()).isEqualTo(A_NUMBER_OF_DAYS);
 		}
@@ -406,27 +416,19 @@ class RentalRepositoryJpaTest extends BasePostgresTest {
 
 	@Test
 	void testDeleteByIdWhenRentalExistsRemovesItFromDatabase() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
+		persistCar(car);
+		persistCustomer(customer);
+		persistRental(activeRental);
 
 		entityManager.getTransaction().begin();
-		rentalRepository.deleteById(rental.getId());
+		rentalRepository.deleteById(activeRental.getId());
 		entityManager.getTransaction().commit();
 
 		entityManager.clear();
 
-		Rental result = entityManager.find(Rental.class, rental.getId());
+		Rental result = entityManager.find(Rental.class, activeRental.getId());
 
 		assertThat(result).isNull();
-	}
-
-	private void persistExpiredRental() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Rental expiredRental = new Rental(car, customer, EXPIRED_START_DATE, EXPIRED_NUMBER_OF_DAYS);
-
-		persistRental(expiredRental);
 	}
 
 	private Car persistCar(Car car) {

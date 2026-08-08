@@ -13,6 +13,7 @@ import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,6 +91,29 @@ class RentalControllerTest {
 	@InjectMocks
 	private RentalController rentalController;
 
+	private RentalViewModel rental, anotherRental;
+	private CarViewModel car, anotherCar;
+	private CustomerViewModel customer, anotherCustomer;
+	private RentalCreationRequest request;
+
+	@BeforeEach
+	void setUp() {
+		rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS, A_CUSTOMER_FULLNAME,
+				A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
+		anotherRental = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
+				ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
+
+		car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new CarViewModel(ANOTHER_CAR_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
+				ANOTHER_DAILY_RATE);
+
+		customer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
+				ANOTHER_LASTNAME);
+
+		request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
+	}
+
 	@Nested
 	class GetAllRentals {
 
@@ -107,8 +131,6 @@ class RentalControllerTest {
 
 		@Test
 		void testGetAllRentalsWhenThereIsOnlyOneRentalCallsShowAllRentalsWithAListWithOneElement() {
-			RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
 			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental));
 
 			rentalController.getAllActiveRentals();
@@ -121,17 +143,13 @@ class RentalControllerTest {
 
 		@Test
 		void testGetAllRentalsWhenThereAreSeveralRentalsCallsShowAllRentalsWithAListWithAllElements() {
-			RentalViewModel firstRental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-			RentalViewModel secondRental = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
-					ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
-			when(rentalService.getAllActiveRentals()).thenReturn(List.of(firstRental, secondRental));
+			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental, anotherRental));
 
 			rentalController.getAllActiveRentals();
 
 			InOrder inOrder = inOrder(rentalService, rentalView);
 			inOrder.verify(rentalService).getAllActiveRentals();
-			inOrder.verify(rentalView).showAllRentals(List.of(firstRental, secondRental));
+			inOrder.verify(rentalView).showAllRentals(List.of(rental, anotherRental));
 			inOrder.verifyNoMoreInteractions();
 		}
 
@@ -142,11 +160,6 @@ class RentalControllerTest {
 
 		@Test
 		void testCreateRentalWhenSuccessfulRefreshesTheRentalList() {
-			RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
-
 			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental));
 			when(carService.getAvailableCars()).thenReturn(List.of(car));
 
@@ -164,7 +177,6 @@ class RentalControllerTest {
 
 		@Test
 		void testCreateRentalWhenCarNotFoundShowsErrorAndDoesNotRefreshList() {
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			CarNotFoundException exception = new CarNotFoundException(A_CAR_ID);
 			doThrow(exception).when(rentalService).createRental(request);
 
@@ -181,7 +193,6 @@ class RentalControllerTest {
 
 		@Test
 		void testCreateRentalWhenCustomerNotFoundShowsErrorAndDoesNotRefreshList() {
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			CustomerNotFoundException exception = new CustomerNotFoundException(A_CUSTOMER_ID);
 			doThrow(exception).when(rentalService).createRental(request);
 
@@ -197,8 +208,7 @@ class RentalControllerTest {
 		}
 
 		@Test
-		void testCreateRentalWhenAreIsAlreadyRentedShowsErrorAndDoesNotRefreshList() {
-			RentalCreationRequest request = new RentalCreationRequest(A_CAR_ID, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
+		void testCreateRentalWhenCarIsAlreadyRentedShowsErrorAndDoesNotRefreshList() {
 			CarAlreadyRentedException exception = new CarAlreadyRentedException(A_CAR_ID);
 			doThrow(exception).when(rentalService).createRental(request);
 
@@ -215,13 +225,13 @@ class RentalControllerTest {
 
 		@Test
 		void testCreateRentalWhenInvalidInputShowsErrorAndDoesNotRefreshList() {
-			RentalCreationRequest request = new RentalCreationRequest(null, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
+			RentalCreationRequest invalidRequest = new RentalCreationRequest(null, A_CUSTOMER_ID, A_NUMBER_OF_DAYS);
 			IllegalArgumentException exception = new IllegalArgumentException("carId must not be blank");
-			doThrow(exception).when(rentalService).createRental(request);
+			doThrow(exception).when(rentalService).createRental(invalidRequest);
 
-			rentalController.createRental(request);
+			rentalController.createRental(invalidRequest);
 
-			verify(rentalService).createRental(request);
+			verify(rentalService).createRental(invalidRequest);
 			verify(rentalView).showError(exception.getMessage());
 			verify(rentalView, never()).clearFields();
 			verify(rentalService, never()).getAllActiveRentals();
@@ -237,10 +247,6 @@ class RentalControllerTest {
 
 		@Test
 		void testDeleteRentalWhenSuccessfulRefreshesTheRentalList() {
-			RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-					A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-
 			when(rentalService.getAllActiveRentals()).thenReturn(List.of(rental));
 			when(carService.getAvailableCars()).thenReturn(List.of(car));
 
@@ -304,7 +310,6 @@ class RentalControllerTest {
 
 		@Test
 		void testLoadAvailableCarsWhenThereIsOnlyOneCarCallsShowAvailableCarsWithAListWithOneElement() {
-			CarViewModel car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 			when(carService.getAvailableCars()).thenReturn(List.of(car));
 
 			rentalController.loadAvailableCars();
@@ -317,16 +322,13 @@ class RentalControllerTest {
 
 		@Test
 		void testLoadAvailableCarsWhenThereAreSeveralCarsCallsShowAvailableCarsWithAListWithAllElements() {
-			CarViewModel firstCar = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			CarViewModel secondCar = new CarViewModel(ANOTHER_CAR_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-					ANOTHER_DAILY_RATE);
-			when(carService.getAvailableCars()).thenReturn(List.of(firstCar, secondCar));
+			when(carService.getAvailableCars()).thenReturn(List.of(car, anotherCar));
 
 			rentalController.loadAvailableCars();
 
 			InOrder inOrder = inOrder(carService, rentalView);
 			inOrder.verify(carService).getAvailableCars();
-			inOrder.verify(rentalView).showAvailableCars(List.of(firstCar, secondCar));
+			inOrder.verify(rentalView).showAvailableCars(List.of(car, anotherCar));
 			inOrder.verifyNoMoreInteractions();
 		}
 
@@ -349,7 +351,6 @@ class RentalControllerTest {
 
 		@Test
 		void testLoadAvailableCustomersWhenThereIsOnlyOneCustomerCallsShowAvailableCustomersWithAListWithOneElement() {
-			CustomerViewModel customer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			when(customerService.getAllCustomers()).thenReturn(List.of(customer));
 
 			rentalController.loadAvailableCustomers();
@@ -362,17 +363,13 @@ class RentalControllerTest {
 
 		@Test
 		void testLoadAvailableCustomersWhenThereAreSeveralCustomersCallsShowAvailableCustomersWithAListWithAllElements() {
-			CustomerViewModel firstCustomer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME,
-					A_LASTNAME);
-			CustomerViewModel secondCustomer = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE,
-					ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
-			when(customerService.getAllCustomers()).thenReturn(List.of(firstCustomer, secondCustomer));
+			when(customerService.getAllCustomers()).thenReturn(List.of(customer, anotherCustomer));
 
 			rentalController.loadAvailableCustomers();
 
 			InOrder inOrder = inOrder(customerService, rentalView);
 			inOrder.verify(customerService).getAllCustomers();
-			inOrder.verify(rentalView).showAvailableCustomers(List.of(firstCustomer, secondCustomer));
+			inOrder.verify(rentalView).showAvailableCustomers(List.of(customer, anotherCustomer));
 			inOrder.verifyNoMoreInteractions();
 		}
 

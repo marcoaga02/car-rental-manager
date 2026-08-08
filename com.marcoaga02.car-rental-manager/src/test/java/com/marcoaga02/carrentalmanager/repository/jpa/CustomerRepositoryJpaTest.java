@@ -15,21 +15,27 @@ import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 	private static final Long AN_ID = 10L;
-
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
-	private static final String ANOTHER_TAX_ID_CODE = "anotherTaxIdCode";
-
 	private static final String A_FIRSTNAME = "aFirstname";
-	private static final String ANOTHER_FIRSTNAME = "anotherFirstname";
-
 	private static final String A_LASTNAME = "aLastname";
+
+	private static final String ANOTHER_TAX_ID_CODE = "anotherTaxIdCode";
+	private static final String ANOTHER_FIRSTNAME = "anotherFirstname";
 	private static final String ANOTHER_LASTNAME = "anotherLastname";
 
+	private static final String A_DELETED_TAX_ID_CODE = "aDeletedTaxIdCode";
+	private static final String A_DELETED_FIRSTNAME = "aDeletedFirstname";
+	private static final String A_DELETED_LASTNAME = "aDeletedLastname";
+
 	private CustomerRepositoryJpa customerRepository;
+	private Customer customer, anotherCustomer;
 
 	@BeforeEach
 	void setUp() {
 		customerRepository = new CustomerRepositoryJpa(entityManager);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 	}
 
 	@Nested
@@ -53,7 +59,7 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenThereIsOnlyOneActiveCustomerReturnAListWithASingleElement() {
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 			persistDeletedCustomer();
 
 			List<Customer> result = customerRepository.findAllActive();
@@ -63,14 +69,13 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenThereAreMultipleActiveCustomersReturnAListWithAllActiveElements() {
-			Customer firstCustomer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-			Customer secondCustomer = persistCustomer(
-					new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+			persistCustomer(customer);
+			persistCustomer(anotherCustomer);
 			persistDeletedCustomer();
 
 			List<Customer> result = customerRepository.findAllActive();
 
-			assertThat(result).hasSize(2).containsExactlyInAnyOrder(firstCustomer, secondCustomer);
+			assertThat(result).hasSize(2).containsExactlyInAnyOrder(customer, anotherCustomer);
 		}
 
 	}
@@ -87,18 +92,16 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByTaxIdCodeWhenCustomerIsDeletedReturnsEmptyOptional() {
-			Customer deletedCustomer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-			deletedCustomer.setDeleted(true);
-			persistCustomer(deletedCustomer);
+			persistDeletedCustomer();
 
-			Optional<Customer> result = customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE);
+			Optional<Customer> result = customerRepository.findActiveByTaxIdCode(A_DELETED_TAX_ID_CODE);
 
 			assertThat(result).isEmpty();
 		}
 
 		@Test
 		void testFindActiveByTaxIdCodeWhenCustomerIsActiveReturnsOptionalWithCustomer() {
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 
 			Optional<Customer> result = customerRepository.findActiveByTaxIdCode(A_TAX_ID_CODE);
 
@@ -107,7 +110,7 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByTaxIdCodeWhenCustomerDoesNotExistReturnsEmpty() {
-			persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 
 			Optional<Customer> result = customerRepository.findActiveByTaxIdCode(ANOTHER_TAX_ID_CODE);
 
@@ -141,7 +144,7 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCustomerDoesNotExistReturnsEmptyOptional() {
-			persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 
 			Optional<Customer> result = customerRepository.findActiveById(Long.MAX_VALUE);
 
@@ -150,9 +153,7 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCustomerIsDeletedReturnsEmptyOptional() {
-			Customer deletedCustomer = new Customer(A_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
-			deletedCustomer.setDeleted(true);
-			persistCustomer(deletedCustomer);
+			Customer deletedCustomer = persistDeletedCustomer();
 
 			Optional<Customer> result = customerRepository.findActiveById(deletedCustomer.getId());
 
@@ -161,7 +162,7 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCustomerIsActiveReturnsOptionalWithCustomer() {
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 
 			Optional<Customer> result = customerRepository.findActiveById(customer.getId());
 
@@ -175,32 +176,32 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testSaveWhenCustomerIsNewPersistsItAndReturnsItWithGeneratedId() {
-			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-
 			entityManager.getTransaction().begin();
 			Customer result = customerRepository.save(customer);
 			entityManager.getTransaction().commit();
 
 			assertThat(result.getId()).isNotNull();
 			assertThat(result.getTaxIdCode()).isEqualTo(A_TAX_ID_CODE);
+			assertThat(result.getFirstname()).isEqualTo(A_FIRSTNAME);
+			assertThat(result.getLastname()).isEqualTo(A_LASTNAME);
 		}
 
 		@Test
 		void testSaveWhenCustomerIsNewCanBeRetrievedDirectlyFromDatabase() {
 			entityManager.getTransaction().begin();
-			Customer customer = customerRepository.save(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			Customer result = customerRepository.save(customer);
 			entityManager.getTransaction().commit();
 
 			entityManager.clear();
 
-			Customer reloaded = entityManager.find(Customer.class, customer.getId());
+			Customer reloaded = entityManager.find(Customer.class, result.getId());
 
-			assertThat(reloaded).isEqualTo(customer);
+			assertThat(reloaded).isEqualTo(result);
 		}
 
 		@Test
 		void testSaveWhenCustomerAlreadyExistsUpdatesItsFieldsInDatabase() {
-			Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			persistCustomer(customer);
 			customer.setDeleted(true);
 
 			entityManager.getTransaction().begin();
@@ -217,11 +218,11 @@ class CustomerRepositoryJpaTest extends BasePostgresTest {
 
 	}
 
-	private void persistDeletedCustomer() {
-		Customer deletedCustomer = new Customer("aDeletedTaxId", "aDeletedFirstname", "aDeletedLastname");
+	private Customer persistDeletedCustomer() {
+		Customer deletedCustomer = new Customer(A_DELETED_TAX_ID_CODE, A_DELETED_FIRSTNAME, A_DELETED_LASTNAME);
 		deletedCustomer.setDeleted(true);
 
-		persistCustomer(deletedCustomer);
+		return persistCustomer(deletedCustomer);
 	}
 
 	private Customer persistCustomer(Customer customer) {

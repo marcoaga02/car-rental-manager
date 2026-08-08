@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -61,8 +62,13 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 
 	private AutoCloseable closeable;
 
+	private CarViewModel car, anotherCar;
+
 	@Override
 	protected void onSetUp() throws Exception {
+		car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
 		closeable = MockitoAnnotations.openMocks(this);
 		carPanel = GuiActionRunner.execute(() -> {
 			CarPanel panel = new CarPanel();
@@ -104,19 +110,14 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testShowAllCarsShouldAddCarsToTheTable() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-
 		GuiActionRunner.execute(() -> {
 			carPanel.getErrorLabel().setText("error message");
-			carPanel.showAllCars(List.of(car1, car2));
+			carPanel.showAllCars(List.of(car, anotherCar));
 		});
 
-		String[][] tableContents = window.table(CAR_TABLE).contents();
-		assertThat(tableContents)
-				.isDeepEqualTo(new String[][] { { A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString() },
-						{ ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()),
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}
@@ -215,7 +216,6 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCarButtonDisabledWhenNoTableRowIsSelected() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
 
 		window.table(CAR_TABLE).selectRows(0);
@@ -227,7 +227,6 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCarButtonEnabledWhenATableRowIsSelected() {
-		CarViewModel car = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car)));
 
 		window.table(CAR_TABLE).selectRows(0);
@@ -268,10 +267,7 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCarButtonShouldDelegateToCarControllerDeleteCar() {
-		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car1, car2)));
+		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car, anotherCar)));
 
 		window.table(CAR_TABLE).selectRows(1);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();

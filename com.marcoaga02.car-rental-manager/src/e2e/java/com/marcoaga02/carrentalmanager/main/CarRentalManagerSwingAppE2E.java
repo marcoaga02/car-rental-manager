@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.main;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.launcher.ApplicationLauncher.application;
 
@@ -7,6 +8,7 @@ import java.awt.Point;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
@@ -77,11 +79,19 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	private static final String DELETE_SELECTED_BTN = "Delete selected";
 	private static final String ERROR_LABEL = "errorLabel";
 
+	private Car car, anotherCar;
+	private Customer customer;
+
 	private FrameFixture window;
 
 	@Override
 	protected void onSetUp() {
 		super.onSetUp();
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 	}
 
 	private void launchApp() {
@@ -105,15 +115,15 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAppStartsOnCarsTabWithCarsAlreadyLoaded() {
-		persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
 
 		launchApp();
 
 		window.tabbedPane().requireSelectedTab(Index.atIndex(CAR_TAB_INDEX));
-		String[][] contents = window.table(CAR_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString() },
-				{ ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()),
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 	}
 
 	@Test
@@ -148,9 +158,9 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 		String formattedStartDate = today.format(DATE_FORMATTER);
 		String formattedEndDate = today.plusDays(A_NUMBER_OF_DAYS).format(DATE_FORMATTER);
 
-		String[][] contents = window.table(RENTAL_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION,
-				formattedStartDate, formattedEndDate, A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents()))
+				.containsExactly(List.of(A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, formattedStartDate, formattedEndDate,
+						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString()));
 
 		assertThat(window.comboBox(CAR_COMBO_BOX).contents()).isEmpty();
 	}
@@ -158,11 +168,12 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingRentalMakesCarAvailableAgainAcrossTabs() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 		persistRental(new Rental(car, customer, LocalDate.now(), A_NUMBER_OF_DAYS));
 
 		launchApp();
+
 		window.tabbedPane().selectTab(RENTALS_TAB);
 
 		assertThat(window.comboBox(CAR_COMBO_BOX).contents()).isEmpty();
@@ -177,8 +188,8 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingCarWithActiveRentalCreatedViaGuiShowsErrorOnCarsTabUntilRentalDelete() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 
 		launchApp();
 
@@ -192,9 +203,9 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 		String formattedStartDate = today.format(DATE_FORMATTER);
 		String formattedEndDate = today.plusDays(A_NUMBER_OF_DAYS).format(DATE_FORMATTER);
 
-		assertThat(window.table(RENTAL_TABLE).contents())
-				.isDeepEqualTo(new String[][] { { A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, formattedStartDate,
-						formattedEndDate, A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents()))
+				.containsExactly(List.of(A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, formattedStartDate, formattedEndDate,
+						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString()));
 
 		window.tabbedPane().selectTab(CARS_TAB);
 		window.table(CAR_TABLE).selectRows(0);
@@ -220,8 +231,8 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingCustomerWithActiveRentalCreatedViaGuiShowsErrorOnCustomersTabUntilRentalDelete() {
-		persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 
 		launchApp();
 
@@ -235,9 +246,9 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 		String formattedStartDate = today.format(DATE_FORMATTER);
 		String formattedEndDate = today.plusDays(A_NUMBER_OF_DAYS).format(DATE_FORMATTER);
 
-		assertThat(window.table(RENTAL_TABLE).contents())
-				.isDeepEqualTo(new String[][] { { A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, formattedStartDate,
-						formattedEndDate, A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents()))
+				.containsExactly(List.of(A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, formattedStartDate, formattedEndDate,
+						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString()));
 
 		window.tabbedPane().selectTab(CUSTOMERS_TAB);
 		window.table(CUSTOMER_TABLE).selectRows(0);

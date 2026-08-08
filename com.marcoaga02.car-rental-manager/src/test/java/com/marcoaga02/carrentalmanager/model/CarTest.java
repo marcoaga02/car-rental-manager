@@ -14,34 +14,31 @@ class CarTest {
 	private static final String A_MODEL = "aModel";
 	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
 
-	private Car car;
+	private Car car, anotherCar;
 
 	@BeforeEach
 	void setUp() {
 		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		other.setUuid(car.getUuid());
+		anotherCar.setUuid(car.getUuid());
 
-		assertThat(car.equals(other)).isTrue();
+		assertThat(car.equals(anotherCar)).isTrue();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-
-		assertThat(car.equals(other)).isFalse();
+		assertThat(car.equals(anotherCar)).isFalse();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		other.setUuid(car.getUuid());
+		anotherCar.setUuid(car.getUuid());
 
-		assertThat(other).hasSameHashCodeAs(car);
+		assertThat(anotherCar).hasSameHashCodeAs(car);
 	}
 
 }

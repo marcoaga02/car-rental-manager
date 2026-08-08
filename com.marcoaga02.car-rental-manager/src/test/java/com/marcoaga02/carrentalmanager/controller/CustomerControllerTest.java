@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,14 @@ class CustomerControllerTest {
 	@InjectMocks
 	private CustomerController customerController;
 
+	private CustomerViewModel customer, anotherCustomer;
+
+	@BeforeEach
+	void setUp() {
+		customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
+	}
+
 	@Nested
 	class GetAllCustomers {
 
@@ -63,7 +72,6 @@ class CustomerControllerTest {
 
 		@Test
 		void testGetAllCustomersWhenThereIsOnlyOneCustomerCallsShowAllCustomersWithAListWithOneElement() {
-			CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			when(customerService.getAllCustomers()).thenReturn(List.of(customer));
 
 			customerController.getAllCustomers();
@@ -76,16 +84,13 @@ class CustomerControllerTest {
 
 		@Test
 		void testGetAllCustomersWhenThereAreSeveralCustomersCallsShowAllCustomersWithAListWithAllElements() {
-			CustomerViewModel firstCustomer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-			CustomerViewModel secondCustomer = new CustomerViewModel(ANOTHER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-					ANOTHER_LASTNAME);
-			when(customerService.getAllCustomers()).thenReturn(List.of(firstCustomer, secondCustomer));
+			when(customerService.getAllCustomers()).thenReturn(List.of(customer, anotherCustomer));
 
 			customerController.getAllCustomers();
 
 			InOrder inOrder = inOrder(customerService, customerView);
 			inOrder.verify(customerService).getAllCustomers();
-			inOrder.verify(customerView).showAllCustomers(List.of(firstCustomer, secondCustomer));
+			inOrder.verify(customerView).showAllCustomers(List.of(customer, anotherCustomer));
 			inOrder.verifyNoMoreInteractions();
 		}
 
@@ -96,28 +101,26 @@ class CustomerControllerTest {
 
 		@Test
 		void testCreateCustomerWhenSuccessfulRefreshesTheCustomerList() {
-			CustomerViewModel request = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-			when(customerService.getAllCustomers()).thenReturn(List.of(request));
+			when(customerService.getAllCustomers()).thenReturn(List.of(customer));
 
-			customerController.createCustomer(request);
+			customerController.createCustomer(customer);
 
 			InOrder inOrder = inOrder(customerService, customerView);
-			inOrder.verify(customerService).createCustomer(request);
+			inOrder.verify(customerService).createCustomer(customer);
 			inOrder.verify(customerView).clearFields();
 			inOrder.verify(customerService).getAllCustomers();
-			inOrder.verify(customerView).showAllCustomers(List.of(request));
+			inOrder.verify(customerView).showAllCustomers(List.of(customer));
 			inOrder.verifyNoMoreInteractions();
 		}
 
 		@Test
 		void testCreateCustomerWhenDuplicateTaxIdCodeShowsErrorAndDoesNotRefreshList() {
-			CustomerViewModel request = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			DuplicateTaxIdCodeException exception = new DuplicateTaxIdCodeException(A_TAX_ID_CODE);
-			doThrow(exception).when(customerService).createCustomer(request);
+			doThrow(exception).when(customerService).createCustomer(customer);
 
-			customerController.createCustomer(request);
+			customerController.createCustomer(customer);
 
-			verify(customerService).createCustomer(request);
+			verify(customerService).createCustomer(customer);
 			verify(customerView).showError(exception.getMessage());
 			verify(customerView, never()).clearFields();
 			verify(customerService, never()).getAllCustomers();
@@ -146,7 +149,6 @@ class CustomerControllerTest {
 
 		@Test
 		void testDeleteCustomerWhenSuccessfulRefreshesTheCustomerList() {
-			CustomerViewModel customer = new CustomerViewModel(AN_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			when(customerService.getAllCustomers()).thenReturn(List.of(customer));
 
 			customerController.deleteCustomer(ANOTHER_ID);

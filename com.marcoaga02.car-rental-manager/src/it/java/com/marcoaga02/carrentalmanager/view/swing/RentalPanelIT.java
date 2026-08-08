@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 
@@ -8,6 +9,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.swing.annotation.GUITest;
@@ -91,6 +93,9 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 	private static final LocalDate TODAY = A_START_DATE;
 	private final Clock fixedClock = Clock.fixed(TODAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
+	private Car car, anotherCar, rentedCar;
+	private Customer customer, anotherCustomer;
+
 	private RentalPanel rentalPanel;
 	private RentalController rentalController;
 	private FrameFixture window;
@@ -112,26 +117,32 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 		});
 
 		window = showInFrame(robot(), rentalPanel);
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+		rentedCar = new Car(A_RENTED_CAR_PLATE, A_RENTED_BRAND, A_RENTED_MODEL, A_RENTED_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 	}
 
 	@Test
 	@GUITest
 	public void testOnActivateShowsActiveRentalsAndPopulatesAvailableCarsAndCustomers() {
-		persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
-		Car rentedCar = persistCar(new Car(A_RENTED_CAR_PLATE, A_RENTED_BRAND, A_RENTED_MODEL, A_RENTED_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
+		persistCar(rentedCar);
 
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		persistCustomer(new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
 
 		persistRental(new Rental(rentedCar, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		GuiActionRunner.execute(() -> rentalPanel.onActivate());
 
-		String[][] contents = window.table(RENTAL_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { A_CUSTOMER_FULLNAME, A_RENTED_CAR_DESCRIPTION, A_FORMATTED_START_DATE,
-						A_FORMATTED_END_DATE, A_NUMBER_OF_DAYS.toString(), A_RENTED_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents()))
+				.containsExactly(List.of(A_CUSTOMER_FULLNAME, A_RENTED_CAR_DESCRIPTION, A_FORMATTED_START_DATE,
+						A_FORMATTED_END_DATE, A_NUMBER_OF_DAYS.toString(), A_RENTED_TOTAL_AMOUNT.toString()));
 
 		String[] carComboContents = window.comboBox(CAR_COMBO_BOX).contents();
 		assertThat(carComboContents).containsExactlyInAnyOrder(A_CAR_DESCRIPTION, ANOTHER_CAR_DESCRIPTION);
@@ -143,16 +154,14 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAddRentalPersistsInDatabaseUpdatesTableAndRemovesCarFromAvailableCombo() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
-		Car alreadyRentedCar = persistCar(
-				new Car(A_RENTED_CAR_PLATE, A_RENTED_BRAND, A_RENTED_MODEL, A_RENTED_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
+		persistCar(rentedCar);
 
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Customer anotherCustomer = persistCustomer(
-				new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
 
-		persistRental(new Rental(alreadyRentedCar, anotherCustomer, TODAY, A_NUMBER_OF_DAYS));
+		persistRental(new Rental(rentedCar, anotherCustomer, TODAY, A_NUMBER_OF_DAYS));
 
 		GuiActionRunner.execute(() -> rentalPanel.onActivate());
 
@@ -185,8 +194,8 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAddRentalWithCarAlreadyRentedShowsError() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 
 		GuiActionRunner.execute(() -> rentalPanel.onActivate());
 
@@ -204,12 +213,11 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeleteRentalRemovesFromDatabaseAndCarBecomesAvailableAgain() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Car anotherCar = persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
 
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		Customer anotherCustomer = persistCustomer(
-				new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
 
 		Rental rental = persistRental(new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS));
 		persistRental(new Rental(anotherCar, anotherCustomer, ANOTHER_START_DATE, ANOTHER_NUMBER_OF_DAYS));
@@ -224,10 +232,9 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 		window.table(RENTAL_TABLE).selectRows(rowToDelete);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		String[][] contents = window.table(RENTAL_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION,
-				ANOTHER_FORMATTED_START_DATE, ANOTHER_FORMATTED_END_DATE, ANOTHER_NUMBER_OF_DAYS.toString(),
-				ANOTHER_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents())).containsExactly(List.of(ANOTHER_CUSTOMER_FULLNAME,
+				ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE, ANOTHER_FORMATTED_END_DATE,
+				ANOTHER_NUMBER_OF_DAYS.toString(), ANOTHER_TOTAL_AMOUNT.toString()));
 
 		Rental persisted = entityManager.find(Rental.class, rental.getId());
 		assertThat(persisted).isNull();

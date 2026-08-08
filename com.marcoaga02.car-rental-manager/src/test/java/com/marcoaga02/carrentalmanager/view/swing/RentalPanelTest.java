@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -98,6 +99,10 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 
 	private AutoCloseable closeable;
 
+	private RentalViewModel rental, anotherRental;
+	private CarViewModel car, anotherCar;
+	private CustomerViewModel customer, anotherCustomer;
+
 	@Override
 	protected void onSetUp() throws Exception {
 		closeable = MockitoAnnotations.openMocks(this);
@@ -107,6 +112,19 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 			return panel;
 		});
 		window = showInFrame(robot(), rentalPanel);
+
+		rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS, A_CUSTOMER_FULLNAME,
+				A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
+		anotherRental = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
+				ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
+
+		car = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new CarViewModel(ANOTHER_CAR_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
+				ANOTHER_DAILY_RATE);
+
+		customer = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
+				ANOTHER_LASTNAME);
 	}
 
 	@Override
@@ -137,23 +155,17 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testShowAllRentalsShouldAddRentalsToTheTable() {
-		RentalViewModel rental1 = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-				A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-		RentalViewModel rental2 = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
-				ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
-
 		GuiActionRunner.execute(() -> {
 			rentalPanel.getErrorLabel().setText("error message");
-			rentalPanel.showAllRentals(List.of(rental1, rental2));
+			rentalPanel.showAllRentals(List.of(rental, anotherRental));
 		});
 
-		String[][] tableContents = window.table(RENTAL_TABLE).contents();
-		assertThat(tableContents).isDeepEqualTo(new String[][] {
-				{ A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_FORMATTED_START_DATE, A_FORMATTED_END_DATE,
-						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString() },
-				{ ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE,
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_FORMATTED_START_DATE, A_FORMATTED_END_DATE,
+						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString()),
+				List.of(ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE,
 						ANOTHER_FORMATTED_END_DATE, ANOTHER_NUMBER_OF_DAYS.toString(),
-						ANOTHER_TOTAL_AMOUNT.toString() } });
+						ANOTHER_TOTAL_AMOUNT.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}
@@ -161,11 +173,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testShowAvailableCarsShouldAddCarsToTheCarComboBoxAndEnableIt() {
-		CarViewModel car1 = new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_CAR_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
-				ANOTHER_DAILY_RATE);
-
-		GuiActionRunner.execute(() -> rentalPanel.showAvailableCars(List.of(car1, car2)));
+		GuiActionRunner.execute(() -> rentalPanel.showAvailableCars(List.of(car, anotherCar)));
 
 		String[] comboContents = window.comboBox(CAR_COMBO_BOX).contents();
 		assertThat(comboContents).containsExactly(A_CAR_DESCRIPTION, ANOTHER_CAR_DESCRIPTION);
@@ -176,8 +184,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testShowAvailableCarsShouldDisableTheCarComboBoxWhenListIsEmpty() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			rentalPanel.getCarComboBox().addItem(car);
 			rentalPanel.getCarComboBox().setEnabled(true);
 
 			rentalPanel.showAvailableCars(Collections.emptyList());
@@ -191,11 +198,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testShowAvailableCustomersShouldAddCustomersToTheCustomersComboBoxAndEnableIt() {
-		CustomerViewModel customer1 = new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		CustomerViewModel customer2 = new CustomerViewModel(ANOTHER_CUSTOMER_ID, ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME,
-				ANOTHER_LASTNAME);
-
-		GuiActionRunner.execute(() -> rentalPanel.showAvailableCustomers(List.of(customer1, customer2)));
+		GuiActionRunner.execute(() -> rentalPanel.showAvailableCustomers(List.of(customer, anotherCustomer)));
 
 		String[] comboContents = window.comboBox(CUSTOMER_COMBO_BOX).contents();
 		assertThat(comboContents).containsExactly(A_CUSTOMER_FULLNAME, ANOTHER_CUSTOMER_FULLNAME);
@@ -206,8 +209,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testShowAvailableCustomersShouldDisableTheCustomerComboBoxWhenListIsEmpty() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCustomerComboBox().addItem(customer);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
 
 			rentalPanel.showAvailableCustomers(Collections.emptyList());
@@ -240,8 +242,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddRentalButtonDisabledWhenCarComboBoxIsInvalid() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCustomerComboBox().addItem(customer);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
 		});
 
@@ -256,8 +257,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddRentalButtonDisabledWhenCustomerComboBoxIsInvalid() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			rentalPanel.getCarComboBox().addItem(car);
 			rentalPanel.getCarComboBox().setEnabled(true);
 		});
 
@@ -272,10 +272,8 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddRentalButtonDisabledWhenRentalDaysIsZero() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCarComboBox().addItem(car);
+			rentalPanel.getCustomerComboBox().addItem(customer);
 
 			rentalPanel.getCarComboBox().setEnabled(true);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
@@ -292,10 +290,8 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddRentalButtonEnabledWhenAllFieldsAreValid() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCarComboBox().addItem(car);
+			rentalPanel.getCustomerComboBox().addItem(customer);
 
 			rentalPanel.getCarComboBox().setEnabled(true);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
@@ -317,8 +313,6 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteRentalButtonDisabledWhenNoTableRowIsSelected() {
-		RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-				A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_DAILY_RATE);
 		GuiActionRunner.execute(() -> rentalPanel.getRentalTableModel().setRentals(List.of(rental)));
 
 		window.table(RENTAL_TABLE).selectRows(0);
@@ -330,8 +324,6 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteCarButtonEnabledWhenATableRowIsSelected() {
-		RentalViewModel rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-				A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_DAILY_RATE);
 		GuiActionRunner.execute(() -> rentalPanel.getRentalTableModel().setRentals(List.of(rental)));
 
 		window.table(RENTAL_TABLE).selectRows(0);
@@ -342,10 +334,8 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testClearFieldsShouldResetAllFieldsAndDisableAddRentalButton() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCarComboBox().addItem(car);
+			rentalPanel.getCustomerComboBox().addItem(customer);
 
 			rentalPanel.getCarComboBox().setEnabled(true);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
@@ -367,10 +357,8 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddRentalButtonShouldDelegateToRentalControllerCreateRental() {
 		GuiActionRunner.execute(() -> {
-			rentalPanel.getCarComboBox()
-					.addItem(new CarViewModel(A_CAR_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			rentalPanel.getCustomerComboBox()
-					.addItem(new CustomerViewModel(A_CUSTOMER_ID, A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+			rentalPanel.getCarComboBox().addItem(car);
+			rentalPanel.getCustomerComboBox().addItem(customer);
 
 			rentalPanel.getCarComboBox().setEnabled(true);
 			rentalPanel.getCustomerComboBox().setEnabled(true);
@@ -389,11 +377,7 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteRentalButtonShouldDelegateToRentalControllerDeleteCar() {
-		RentalViewModel rental1 = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-				A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
-		RentalViewModel rental2 = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
-				ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
-		GuiActionRunner.execute(() -> rentalPanel.getRentalTableModel().setRentals(List.of(rental1, rental2)));
+		GuiActionRunner.execute(() -> rentalPanel.getRentalTableModel().setRentals(List.of(rental, anotherRental)));
 
 		window.table(RENTAL_TABLE).selectRows(1);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();

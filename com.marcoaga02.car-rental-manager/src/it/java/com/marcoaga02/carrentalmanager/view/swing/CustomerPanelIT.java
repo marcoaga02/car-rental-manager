@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 
@@ -7,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.swing.annotation.GUITest;
@@ -60,6 +62,8 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 	private static final LocalDate TODAY = LocalDate.parse("2026-05-10");
 	private final Clock fixedClock = Clock.fixed(TODAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
+	private Customer customer, anotherCustomer;
+
 	private CustomerPanel customerPanel;
 	private CustomerController customerController;
 	private FrameFixture window;
@@ -79,26 +83,29 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 		});
 
 		window = showInFrame(robot(), customerPanel);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME);
 	}
 
 	@Test
 	@GUITest
 	public void testOnActivateShowsOnlyActiveCustomersFromDatabase() {
 		persistDeletedCustomer();
-		persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		persistActiveCustomer(new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
 
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME },
-				{ ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 	}
 
 	@Test
 	@GUITest
 	public void testAddCustomerPersistsInDatabaseAndKeepsPreviouslyExistingCustomers() {
-		persistActiveCustomer(new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(anotherCustomer);
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
 
 		window.textBox(TAX_ID_CODE_TEXT_FIELD).enterText(A_TAX_ID_CODE);
@@ -107,10 +114,9 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 
 		window.button(JButtonMatcher.withText(ADD_CUSTOMER_BTN)).click();
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME },
-						{ A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		window.label(ERROR_LABEL).requireText(" ");
 
@@ -130,7 +136,7 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAddCustomerWithDuplicateTaxIdCodeShowsError() {
-		persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCustomer(customer);
 
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
 
@@ -146,17 +152,21 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeleteCustomerSoftDeletesInDatabaseAndRemovesFromTable() {
-		Customer customer = persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		persistActiveCustomer(new Customer(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
+		persistCustomer(customer);
+		persistCustomer(anotherCustomer);
 
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
 
-		window.table(CUSTOMER_TABLE).selectRows(0);
+		CustomerTableModel tableModel = customerPanel.getCustomerTableModel();
+		int rowToDelete = IntStream.range(0, tableModel.getRowCount())
+				.filter(row -> tableModel.getCustomerAt(row).getTaxIdCode().equals(A_TAX_ID_CODE)).findFirst()
+				.orElseThrow();
+
+		window.table(CUSTOMER_TABLE).selectRows(rowToDelete);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents()))
+				.containsExactly(List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		Customer persisted = entityManager.find(Customer.class, customer.getId());
 		assertThat(persisted.getDeleted()).isTrue();
@@ -166,7 +176,7 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 	@GUITest
 	public void testDeleteCustomerWithActiveRentalShowsErrorAndCustomerStaysActive() {
 		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistActiveCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCustomer(customer);
 		persistRental(new Rental(car, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
@@ -181,17 +191,13 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 		assertThat(persisted.getDeleted()).isFalse();
 	}
 
-	private Customer persistActiveCustomer(Customer customer) {
-		return persistCustomer(customer, false);
-	}
-
 	private Customer persistDeletedCustomer() {
 		Customer deletedCustomer = new Customer("aDeletedTaxIdCode", "aDeletedFirstname", "aDeletedLastname");
-		return persistCustomer(deletedCustomer, true);
+		deletedCustomer.setDeleted(true);
+		return persistCustomer(deletedCustomer);
 	}
 
-	private Customer persistCustomer(Customer customer, boolean deleted) {
-		customer.setDeleted(deleted);
+	private Customer persistCustomer(Customer customer) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(customer);
 		entityManager.getTransaction().commit();

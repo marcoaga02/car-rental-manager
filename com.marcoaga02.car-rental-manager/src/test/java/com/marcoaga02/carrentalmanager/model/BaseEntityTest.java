@@ -16,11 +16,12 @@ class BaseEntityTest {
 
 	private static final String A_STRING = "aString";
 
-	private Car entity;
+	private Car entity, anotherEntity;
 
 	@BeforeEach
 	void setUp() {
 		entity = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherEntity = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
 	}
 
 	@Test
@@ -51,24 +52,20 @@ class BaseEntityTest {
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		other.setUuid(entity.getUuid());
+		anotherEntity.setUuid(entity.getUuid());
 
-		assertThat(entity.equals(other)).isTrue();
+		assertThat(entity.equals(anotherEntity)).isTrue();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-
-		assertThat(entity.equals(other)).isFalse();
+		assertThat(entity.equals(anotherEntity)).isFalse();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Car other = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		other.setUuid(entity.getUuid());
+		anotherEntity.setUuid(entity.getUuid());
 
-		assertThat(other).hasSameHashCodeAs(entity);
+		assertThat(anotherEntity).hasSameHashCodeAs(entity);
 	}
 }
