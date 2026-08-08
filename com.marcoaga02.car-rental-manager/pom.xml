@@ -42,7 +42,8 @@
 
     <sonar.tests>
       ${project.basedir}/src/test/java,
-      ${project.basedir}/src/it/java
+      ${project.basedir}/src/it/java,
+      ${project.basedir}/src/e2e/java
     </sonar.tests>
 
     <sonar.junit.reportPaths>
@@ -279,6 +280,7 @@
             <configuration>
               <sources>
                 <source>src/it/java</source>
+                 <source>src/e2e/java</source>
               </sources>
             </configuration>
           </execution>
@@ -295,6 +297,21 @@
               <goal>verify</goal>
             </goals>
           </execution>
+          <execution>
+            <id>e2e-tests</id>
+            <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+            </goals>
+            <configuration>
+                <excludes>
+                    <exclude>**/*IT.java</exclude>
+                </excludes>
+                <includes>
+                    <include>**/*E2E.java</include>
+                </includes>
+            </configuration>
+        </execution>
         </executions>
       </plugin>
       <plugin>
