@@ -59,9 +59,6 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 	private JComboBox<CustomerViewModel> customerComboBox;
 	private JSpinner rentalDaysSpinner;
 
-	/**
-	 * Create the panel.
-	 */
 	public RentalPanel() {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		setLayout(new BorderLayout(0, 0));
@@ -243,7 +240,8 @@ public class RentalPanel extends JPanel implements RentalView, ActivablePanel {
 			CustomerViewModel selectedCustomer = (CustomerViewModel) customerComboBox.getSelectedItem();
 			int rentalDays = ((Number) rentalDaysSpinner.getValue()).intValue();
 
-			rentalController.createRental(new RentalCreationRequest(selectedCar.getId(), selectedCustomer.getId(), rentalDays));
+			rentalController
+					.createRental(new RentalCreationRequest(selectedCar.getId(), selectedCustomer.getId(), rentalDays));
 		});
 	}
 

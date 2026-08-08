@@ -34,7 +34,7 @@ class RentalTableModelTest {
 
 	private static final String A_FORMATTED_START_DATE = "24/06/2026";
 	private static final String A_FORMATTED_END_DATE = "30/06/2026";
-	
+
 	private static final String CUSTOMER_COLUMN = "Customer";
 	private static final String CAR_COLUMN = "Car";
 	private static final String START_DATE_COLUMN = "Start Date";
@@ -43,14 +43,14 @@ class RentalTableModelTest {
 	private static final String TOTAL_AMOUNT_COLUMN = "Total Amount (€)";
 
 	private RentalTableModel rentalTableModel;
-	
+
 	private RentalViewModel rental, anotherRental;
 
 	@BeforeEach
 	void setUp() {
 		rentalTableModel = new RentalTableModel();
-		rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS,
-				A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
+		rental = new RentalViewModel(A_RENTAL_ID, A_START_DATE, AN_END_DATE, A_NUMBER_OF_DAYS, A_CUSTOMER_FULLNAME,
+				A_CAR_DESCRIPTION, A_TOTAL_AMOUNT);
 		anotherRental = new RentalViewModel(ANOTHER_RENTAL_ID, ANOTHER_START_DATE, ANOTHER_END_DATE,
 				ANOTHER_NUMBER_OF_DAYS, ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_TOTAL_AMOUNT);
 	}
@@ -97,7 +97,7 @@ class RentalTableModelTest {
 	@Test
 	void testSetRentalsShouldReplacePreviousRentals() {
 		rentalTableModel.getRentals().add(rental);
-		
+
 		rentalTableModel.setRentals(List.of(anotherRental));
 
 		assertThat(rentalTableModel.getRentals()).containsExactly(anotherRental);
@@ -113,7 +113,7 @@ class RentalTableModelTest {
 
 		assertThat(rentalTableModel.getRentals()).containsExactly(rental);
 	}
-	
+
 	@Test
 	void testGetRentalAtShouldReturnCorrectRental() {
 		List<RentalViewModel> rentals = rentalTableModel.getRentals();

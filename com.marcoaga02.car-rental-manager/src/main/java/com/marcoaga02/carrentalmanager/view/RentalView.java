@@ -9,9 +9,9 @@ import com.marcoaga02.carrentalmanager.viewmodel.RentalViewModel;
 public interface RentalView extends BaseView {
 
 	void showAllRentals(List<RentalViewModel> rentals);
-	
+
 	void showAvailableCars(List<CarViewModel> cars);
-	
+
 	void showAvailableCustomers(List<CustomerViewModel> customers);
 
 }

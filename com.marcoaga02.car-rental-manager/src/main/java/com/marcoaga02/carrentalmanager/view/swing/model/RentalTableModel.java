@@ -12,9 +12,10 @@ public class RentalTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String[] COLUMN_NAMES = { "Customer", "Car", "Start Date", "End Date", "Days", "Total Amount (€)" };
+	private static final String[] COLUMN_NAMES = { "Customer", "Car", "Start Date", "End Date", "Days",
+			"Total Amount (€)" };
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	
+
 	private transient List<RentalViewModel> rentals = new ArrayList<>();
 
 	public void setRentals(List<RentalViewModel> rentals) {
