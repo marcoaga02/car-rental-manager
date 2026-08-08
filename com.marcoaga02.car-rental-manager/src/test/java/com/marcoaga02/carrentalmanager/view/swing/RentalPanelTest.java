@@ -313,7 +313,6 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteRentalButtonDisabledWhenNoTableRowIsSelected() {
-		;
 		GuiActionRunner.execute(() -> rentalPanel.getRentalTableModel().setRentals(List.of(rental)));
 
 		window.table(RENTAL_TABLE).selectRows(0);
