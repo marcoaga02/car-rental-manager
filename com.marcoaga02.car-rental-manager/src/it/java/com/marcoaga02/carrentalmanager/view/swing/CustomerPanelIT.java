@@ -13,7 +13,9 @@ import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.junit.runner.GUITestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.marcoaga02.carrentalmanager.controller.CustomerController;
 import com.marcoaga02.carrentalmanager.mapper.CustomerMapper;
@@ -26,6 +28,7 @@ import com.marcoaga02.carrentalmanager.transaction.jpa.TransactionManagerJpa;
 import com.marcoaga02.carrentalmanager.view.swing.model.CustomerTableModel;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
+@RunWith(GUITestRunner.class)
 public class CustomerPanelIT extends BaseSwingPostgresTest {
 
 	private static final String A_CAR_PLATE = "aCarPlate";
