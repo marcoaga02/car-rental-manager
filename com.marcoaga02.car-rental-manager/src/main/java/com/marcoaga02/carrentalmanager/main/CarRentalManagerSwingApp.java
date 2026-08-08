@@ -2,6 +2,8 @@ package com.marcoaga02.carrentalmanager.main;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,11 +64,11 @@ public class CarRentalManagerSwingApp implements Callable<Void> {
 		EventQueue.invokeLater(() -> {
 			try {
 				Map<String, String> properties = new HashMap<>();
-				properties.put("javax.persistence.jdbc.url",
+				properties.put("jakarta.persistence.jdbc.url",
 						String.format("jdbc:postgresql://%s:%d/%s", dbHost, dbPort, dbName));
-				properties.put("javax.persistence.jdbc.user", dbUser);
-				properties.put("javax.persistence.jdbc.password", dbPassword);
-				properties.put("javax.persistence.jdbc.driver", "org.postgresql.Driver");
+				properties.put("jakarta.persistence.jdbc.user", dbUser);
+				properties.put("jakarta.persistence.jdbc.password", dbPassword);
+				properties.put("jakarta.persistence.jdbc.driver", "org.postgresql.Driver");
 				properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
 				properties.put("hibernate.hbm2ddl.auto", "update");
 				properties.put("hibernate.show_sql", "false");
@@ -80,6 +82,15 @@ public class CarRentalManagerSwingApp implements Callable<Void> {
 				RentalService rentalService = new RentalServiceImpl(transactionManager, new RentalMapper(), clock);
 
 				MainFrame mainFrame = new MainFrame();
+
+				mainFrame.addWindowListener(new WindowAdapter() {
+					@Override
+					public void windowClosed(WindowEvent e) {
+						if (entityManagerFactory != null) {
+							entityManagerFactory.close();
+						}
+					}
+				});
 
 				CarController carController = new CarController(carService, mainFrame.getCarPanel());
 				CustomerController customerController = new CustomerController(customerService,
