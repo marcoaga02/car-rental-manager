@@ -10,12 +10,10 @@ import org.junit.jupiter.api.Test;
 class TableAssertionUtilsTest {
 
 	@Test
-	void testRowsOfConvertsEachRowPreservingOrderAndContent() {
-		String[][] tableContents = { { "a", "b" }, { "c", "d" } };
+	void testRowsOfWithNullReturnsEmptyList() {
+		List<List<String>> rows = rowsOf(null);
 
-		List<List<String>> rows = rowsOf(tableContents);
-
-		assertThat(rows).containsExactly(List.of("a", "b"), List.of("c", "d"));
+		assertThat(rows).isEmpty();
 	}
 
 	@Test
@@ -25,6 +23,24 @@ class TableAssertionUtilsTest {
 		List<List<String>> rows = rowsOf(tableContents);
 
 		assertThat(rows).isEmpty();
+	}
+
+	@Test
+	void testRowsOfWithOneRowConvertsRowPreservingOrderAndContent() {
+		String[][] tableContents = { { "a", "b" } };
+
+		List<List<String>> rows = rowsOf(tableContents);
+
+		assertThat(rows).containsExactly(List.of("a", "b"));
+	}
+
+	@Test
+	void testRowsOfWithMultipleRowsConvertsEachRowPreservingOrderAndContent() {
+		String[][] tableContents = { { "a", "b" }, { "c", "d" } };
+
+		List<List<String>> rows = rowsOf(tableContents);
+
+		assertThat(rows).containsExactly(List.of("a", "b"), List.of("c", "d"));
 	}
 
 }
