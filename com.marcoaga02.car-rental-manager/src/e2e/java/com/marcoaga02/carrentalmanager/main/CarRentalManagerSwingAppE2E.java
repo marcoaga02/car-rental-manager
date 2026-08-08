@@ -121,6 +121,11 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	public void testCreatingCarCustomerAndRentalPropagatesAcrossAllTabs() {
 		launchApp();
 
+		window.tabbedPane().selectTab(RENTALS_TAB);
+		assertThat(window.comboBox(CAR_COMBO_BOX).contents()).isEmpty();
+		assertThat(window.comboBox(CUSTOMER_COMBO_BOX).contents()).isEmpty();
+
+		window.tabbedPane().selectTab(CARS_TAB);
 		window.textBox(CAR_PLATE_TEXT_FIELD).enterText(A_CAR_PLATE);
 		window.textBox(BRAND_TEXT_FIELD).enterText(A_BRAND);
 		window.textBox(MODEL_TEXT_FIELD).enterText(A_MODEL);
