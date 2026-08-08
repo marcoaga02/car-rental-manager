@@ -58,9 +58,6 @@ public class CarPanel extends JPanel implements CarView, ActivablePanel {
 	private JButton deleteCarButton;
 	private JPanel rightPanel;
 
-	/**
-	 * Create the panel.
-	 */
 	public CarPanel() {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		setLayout(new BorderLayout(0, 0));

@@ -30,7 +30,7 @@ import javax.swing.SwingConstants;
 public class CustomerPanel extends JPanel implements CustomerView, ActivablePanel {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String DIALOG_FONT = "Dialog";
 
 	private transient CustomerController customerController;
@@ -54,9 +54,6 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 	private JPanel fillerPanel;
 	private JButton addCustomerButton;
 
-	/**
-	 * Create the panel.
-	 */
 	public CustomerPanel() {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		setLayout(new BorderLayout(0, 0));
@@ -95,9 +92,9 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 		deleteCustomerButton = new JButton("Delete selected");
 		deleteCustomerButton.setEnabled(false);
 		footerPanel.add(deleteCustomerButton, BorderLayout.EAST);
-		
-		deleteCustomerButton.addActionListener(
-				e -> customerController.deleteCustomer(customerTableModel.getCustomerAt(customerTable.getSelectedRow()).getId()));
+
+		deleteCustomerButton.addActionListener(e -> customerController
+				.deleteCustomer(customerTableModel.getCustomerAt(customerTable.getSelectedRow()).getId()));
 
 		rightPanel = new JPanel();
 		rightPanel.setBorder(new LineBorder(new Color(128, 128, 128)));
@@ -209,7 +206,7 @@ public class CustomerPanel extends JPanel implements CustomerView, ActivablePane
 
 		addCustomerButton.addActionListener(e -> customerController.createCustomer(new CustomerViewModel(null,
 				taxIdCodeTextField.getText(), firstnameTextField.getText(), lastnameTextField.getText())));
-		
+
 		createCustomerTitleLabel = new JLabel("Create Customer");
 		createCustomerTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		createCustomerTitleLabel.setBorder(new EmptyBorder(5, 10, 5, 10));

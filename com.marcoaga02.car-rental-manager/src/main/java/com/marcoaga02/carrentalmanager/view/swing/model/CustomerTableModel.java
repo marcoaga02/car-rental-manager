@@ -10,7 +10,7 @@ import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 public class CustomerTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String[] COLUMN_NAMES = { "Tax Id Code", "Firstname", "Lastname" };
 
 	private transient List<CustomerViewModel> customers = new ArrayList<>();
@@ -29,12 +29,12 @@ public class CustomerTableModel extends AbstractTableModel {
 	public int getRowCount() {
 		return customers.size();
 	}
-	
+
 	@Override
 	public String getColumnName(int column) {
 		return COLUMN_NAMES[column];
 	}
-	
+
 	public CustomerViewModel getCustomerAt(int rowIndex) {
 		if (rowIndex >= customers.size()) {
 			throw new IllegalArgumentException("Invalid row: " + rowIndex);

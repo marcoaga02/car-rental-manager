@@ -269,7 +269,8 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testDeleteCarButtonShouldDelegateToCarControllerDeleteCar() {
 		CarViewModel car1 = new CarViewModel(AN_ID, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+		CarViewModel car2 = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
+				ANOTHER_DAILY_RATE);
 		GuiActionRunner.execute(() -> carPanel.getCarTableModel().setCars(List.of(car1, car2)));
 
 		window.table(CAR_TABLE).selectRows(1);

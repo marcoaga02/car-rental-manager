@@ -54,7 +54,7 @@ class RentalServiceImplIT extends BasePostgresTest {
 	void setUp() {
 		TransactionManagerJpa transactionManager = new TransactionManagerJpa(entityManagerFactory, fixedClock);
 		rentalService = new RentalServiceImpl(transactionManager, new RentalMapper(), fixedClock);
-		
+
 		car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
 		customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
 	}

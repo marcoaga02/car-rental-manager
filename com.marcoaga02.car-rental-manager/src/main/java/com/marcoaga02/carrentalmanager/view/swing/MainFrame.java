@@ -26,9 +26,6 @@ public class MainFrame extends JFrame {
 
 	private transient Map<Integer, ActivablePanel> activablePanelsByIndex;
 
-	/**
-	 * Create the frame.
-	 */
 	public MainFrame() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1500, 800);
@@ -71,7 +68,7 @@ public class MainFrame extends JFrame {
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
-	
+
 	// package-private for tests only
 	Map<Integer, ActivablePanel> getActivablePanelsByIndex() {
 		return activablePanelsByIndex;

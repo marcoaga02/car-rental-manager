@@ -54,7 +54,7 @@ public class RentalController {
 			rentalView.showError(e.getMessage());
 		}
 	}
-	
+
 	public void loadAvailableCars() {
 		rentalView.showAvailableCars(carService.getAvailableCars());
 	}
