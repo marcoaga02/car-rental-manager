@@ -11,34 +11,31 @@ class CustomerTest {
 	private static final String A_FIRSTNAME = "aFirstname";
 	private static final String A_LASTNAME = "aLastname";
 
-	private Customer customer;
+	private Customer customer, anotherCustomer;
 
 	@BeforeEach
 	void setUp() {
 		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
+		anotherCustomer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTrue() {
-		Customer other = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		other.setUuid(customer.getUuid());
+		anotherCustomer.setUuid(customer.getUuid());
 
-		assertThat(customer.equals(other)).isTrue();
+		assertThat(customer.equals(anotherCustomer)).isTrue();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsDifferentReturnFalse() {
-		Customer other = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-
-		assertThat(customer.equals(other)).isFalse();
+		assertThat(customer.equals(anotherCustomer)).isFalse();
 	}
 
 	@Test
 	void testEqualsWhenUuidIsTheSameReturnTheSameHashCode() {
-		Customer other = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
-		other.setUuid(customer.getUuid());
+		anotherCustomer.setUuid(customer.getUuid());
 
-		assertThat(other).hasSameHashCodeAs(customer);
+		assertThat(anotherCustomer).hasSameHashCodeAs(customer);
 	}
 
 }

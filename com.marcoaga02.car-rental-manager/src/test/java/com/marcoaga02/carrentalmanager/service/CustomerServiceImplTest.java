@@ -62,17 +62,15 @@ class CustomerServiceImplTest {
 	@InjectMocks
 	private CustomerServiceImpl customerService;
 
-	private static final String A_TAX_ID_CODE = "aTaxIdCode";
-	private static final String ANOTHER_TAX_ID_CODE = "anotherTaxIdCode";
-
-	private static final String A_FIRSTNAME = "aFirstname";
-	private static final String ANOTHER_FIRSTNAME = "anotherFirstname";
-
-	private static final String A_LASTNAME = "aLastname";
-	private static final String ANOTHER_LASTNAME = "anotherLastname";
-
 	private static final Long AN_ID = 10L;
+	private static final String A_TAX_ID_CODE = "aTaxIdCode";
+	private static final String A_FIRSTNAME = "aFirstname";
+	private static final String A_LASTNAME = "aLastname";
+
 	private static final Long ANOTHER_ID = 15L;
+	private static final String ANOTHER_TAX_ID_CODE = "anotherTaxIdCode";
+	private static final String ANOTHER_FIRSTNAME = "anotherFirstname";
+	private static final String ANOTHER_LASTNAME = "anotherLastname";
 
 	private Customer customer, anotherCustomer;
 	private CustomerViewModel customerViewModel, anotherCustomerViewModel;

@@ -35,6 +35,9 @@ class CarServiceImplIT extends BasePostgresTest {
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(50.2);
 
 	private static final String A_DELETED_CAR_PLATE = "aDeletedCarPlate";
+	private static final String A_DELETED_BRAND = "aDeletedBrand";
+	private static final String A_DELETED_MODEL = "aDeletedModel";
+	private static final BigDecimal A_DELETED_DAILY_RATE = BigDecimal.valueOf(15.3);
 
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
 	private static final String A_FIRSTNAME = "aFirstname";
@@ -46,31 +49,41 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	private final Clock fixedClock = Clock.fixed(TODAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
+	private Car car, anotherCar;
+	private Customer customer;
+
 	private CarService carService;
 
 	@BeforeEach
 	void setUp() {
 		TransactionManagerJpa transactionManager = new TransactionManagerJpa(entityManagerFactory, fixedClock);
 		carService = new CarServiceImpl(transactionManager, new CarMapper());
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 	}
 
 	@Test
 	void testGetAllCarsIncludesAllActiveCars() {
-		persistDeletedCar(new Car(A_DELETED_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Car availableCar = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Car rentedCar = persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
-		persistRental(new Rental(rentedCar, customer, TODAY, A_NUMBER_OF_DAYS));
+		persistDeletedCar();
+		persistCar(car);
+		persistCar(anotherCar);
+		persistCustomer(customer);
+		persistRental(new Rental(anotherCar, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		List<CarViewModel> result = carService.getAllCars();
 
-		assertThat(result).hasSize(2).extracting(CarViewModel::getId).containsExactlyInAnyOrder(availableCar.getId(),
-				rentedCar.getId());
+		assertThat(result).hasSize(2).extracting(CarViewModel::getId).containsExactlyInAnyOrder(car.getId(),
+				anotherCar.getId());
 	}
 
 	@Test
 	void testCreateCarPersistsTheCarAndReturnsItsGeneratedId() {
-		CarViewModel result = carService.createCar(new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		CarViewModel request = new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+
+		CarViewModel result = carService.createCar(request);
 
 		assertThat(result.getId()).isNotNull();
 
@@ -85,17 +98,19 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testCreateCarThrowsDuplicateCarPlateExceptionWhenAnActiveCarWithTheSamePlateAlreadyExists() {
-		persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		CarViewModel car = new CarViewModel(null, A_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+		persistCar(car);
 
-		assertThatThrownBy(() -> carService.createCar(car)).isInstanceOf(DuplicateCarPlateException.class);
+		CarViewModel request = new CarViewModel(null, A_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
+		assertThatThrownBy(() -> carService.createCar(request)).isInstanceOf(DuplicateCarPlateException.class);
 	}
 
 	@Test
 	void testCreateCarDoesNotConsiderDeletedCarsAsDuplicatesAndCreatesANewElement() {
-		Car deletedCar = persistDeletedCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		Car deletedCar = persistDeletedCar();
 
-		CarViewModel result = carService.createCar(new CarViewModel(null, A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		CarViewModel result = carService
+				.createCar(new CarViewModel(null, A_DELETED_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
 
 		assertThat(result.getId()).isNotNull();
 		assertThat(deletedCar.getId()).isNotNull().isNotEqualTo(result.getId());
@@ -103,7 +118,7 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testDeleteCarSoftDeletesTheCarWhenItIsNotRented() {
-		Car car = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		persistCar(car);
 		Long carId = car.getId();
 
 		carService.deleteCar(carId);
@@ -114,8 +129,8 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testDeleteCarThrowsCarCurrentlyRentedExceptionWhenTheCarHasAnActiveRental() {
-		Car car = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 		persistRental(new Rental(car, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		Long carId = car.getId();
@@ -128,9 +143,9 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testGetAvailableCarsExcludesCarsWithAnActiveRental() {
-		Car availableCar = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Car rentedCar = persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		Car availableCar = persistCar(car);
+		Car rentedCar = persistCar(anotherCar);
+		persistCustomer(customer);
 		persistRental(new Rental(rentedCar, customer, TODAY, A_NUMBER_OF_DAYS));
 
 		List<CarViewModel> result = carService.getAvailableCars();
@@ -140,24 +155,21 @@ class CarServiceImplIT extends BasePostgresTest {
 
 	@Test
 	void testGetAvailableCarsExcludesDeletedCars() {
-		Car availableCar = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistDeletedCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistDeletedCar();
 
 		List<CarViewModel> result = carService.getAvailableCars();
 
-		assertThat(result).extracting(CarViewModel::getId).containsExactly(availableCar.getId());
+		assertThat(result).extracting(CarViewModel::getId).containsExactly(car.getId());
 	}
 
-	private Car persistActiveCar(Car car) {
-		return persistCar(car, false);
+	private Car persistDeletedCar() {
+		Car deletedCar = new Car(A_DELETED_CAR_PLATE, A_DELETED_BRAND, A_DELETED_MODEL, A_DELETED_DAILY_RATE);
+		deletedCar.setDeleted(true);
+		return persistCar(deletedCar);
 	}
 
-	private Car persistDeletedCar(Car car) {
-		return persistCar(car, true);
-	}
-
-	private Car persistCar(Car car, boolean deleted) {
-		car.setDeleted(deleted);
+	private Car persistCar(Car car) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(car);
 		entityManager.getTransaction().commit();

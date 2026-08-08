@@ -79,11 +79,19 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	private static final String DELETE_SELECTED_BTN = "Delete selected";
 	private static final String ERROR_LABEL = "errorLabel";
 
+	private Car car, anotherCar;
+	private Customer customer;
+
 	private FrameFixture window;
 
 	@Override
 	protected void onSetUp() {
 		super.onSetUp();
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 	}
 
 	private void launchApp() {
@@ -107,8 +115,8 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAppStartsOnCarsTabWithCarsAlreadyLoaded() {
-		persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
 
 		launchApp();
 
@@ -160,11 +168,12 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingRentalMakesCarAvailableAgainAcrossTabs() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 		persistRental(new Rental(car, customer, LocalDate.now(), A_NUMBER_OF_DAYS));
 
 		launchApp();
+
 		window.tabbedPane().selectTab(RENTALS_TAB);
 
 		assertThat(window.comboBox(CAR_COMBO_BOX).contents()).isEmpty();
@@ -179,8 +188,8 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingCarWithActiveRentalCreatedViaGuiShowsErrorOnCarsTabUntilRentalDelete() {
-		Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 
 		launchApp();
 
@@ -222,8 +231,8 @@ public class CarRentalManagerSwingAppE2E extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeletingCustomerWithActiveRentalCreatedViaGuiShowsErrorOnCustomersTabUntilRentalDelete() {
-		persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
+		persistCar(car);
+		persistCustomer(customer);
 
 		launchApp();
 

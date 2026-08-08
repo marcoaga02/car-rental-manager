@@ -66,20 +66,17 @@ class CarServiceImplTest {
 	@InjectMocks
 	private CarServiceImpl carService;
 
-	private static final String A_CAR_PLATE = "aCarPlate";
-	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
-
-	private static final String A_BRAND = "aBrand";
-	private static final String ANOTHER_BRAND = "anotherBrand";
-
-	private static final String A_MODEL = "aModel";
-	private static final String ANOTHER_MODEL = "anotherModel";
-
-	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
-	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
-
 	private static final Long AN_ID = 10L;
+	private static final String A_CAR_PLATE = "aCarPlate";
+	private static final String A_BRAND = "aBrand";
+	private static final String A_MODEL = "aModel";
+	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
+
 	private static final Long ANOTHER_ID = 13L;
+	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
+	private static final String ANOTHER_BRAND = "anotherBrand";
+	private static final String ANOTHER_MODEL = "anotherModel";
+	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
 
 	private static final String A_TAX_ID_CODE = "aTaxIdCode";
 	private static final String A_FIRSTNAME = "aFirstname";
@@ -90,6 +87,7 @@ class CarServiceImplTest {
 
 	private Car car, anotherCar;
 	private CarViewModel carViewModel, anotherCarViewModel;
+	private Customer customer;
 
 	@BeforeEach
 	void setup() {
@@ -99,6 +97,8 @@ class CarServiceImplTest {
 		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
 		anotherCarViewModel = new CarViewModel(ANOTHER_ID, ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL,
 				ANOTHER_DAILY_RATE);
+
+		customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 	}
 
 	// Required by the strict stubbing of MockitoExtension
@@ -378,7 +378,6 @@ class CarServiceImplTest {
 		void testGetAvailableCarsWhenCarHasActiveRentalIsExcluded() {
 			stubTransaction().withRentalRepository();
 
-			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			Rental activeRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findAllActive()).thenReturn(List.of(car));
@@ -398,7 +397,6 @@ class CarServiceImplTest {
 		void testGetAvailableCarsWhenOnlySomeCarsAreRentedReturnsOnlyTheAvailableOnes() {
 			stubTransaction().withRentalRepository();
 
-			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			Rental activeRental = new Rental(anotherCar, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 
 			when(carRepository.findAllActive()).thenReturn(List.of(car, anotherCar));
@@ -419,7 +417,6 @@ class CarServiceImplTest {
 		void testGetAvailableCarsWhenAllCarsAreRentedReturnsAnEmptyList() {
 			stubTransaction().withRentalRepository();
 
-			Customer customer = new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME);
 			Rental firstRental = new Rental(car, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 			Rental secondRental = new Rental(anotherCar, customer, A_START_DATE, A_NUMBER_OF_DAYS);
 

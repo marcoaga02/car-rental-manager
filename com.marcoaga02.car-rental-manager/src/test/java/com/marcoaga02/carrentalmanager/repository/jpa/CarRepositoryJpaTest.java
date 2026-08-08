@@ -16,24 +16,30 @@ import com.marcoaga02.carrentalmanager.testutils.BasePostgresTest;
 class CarRepositoryJpaTest extends BasePostgresTest {
 
 	private static final Long AN_ID = 10L;
-
 	private static final String A_CAR_PLATE = "aCarPlate";
-	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
-
 	private static final String A_BRAND = "aBrand";
-	private static final String ANOTHER_BRAND = "anotherBrand";
-
 	private static final String A_MODEL = "aModel";
-	private static final String ANOTHER_MODEL = "anotherModel";
-
 	private static final BigDecimal A_DAILY_RATE = BigDecimal.valueOf(10.2);
+
+	private static final String ANOTHER_CAR_PLATE = "anotherCarPlate";
+	private static final String ANOTHER_BRAND = "anotherBrand";
+	private static final String ANOTHER_MODEL = "anotherModel";
 	private static final BigDecimal ANOTHER_DAILY_RATE = BigDecimal.valueOf(4.3);
 
+	private static final String A_DELETED_CAR_PLATE = "aDeletedPlate";
+	private static final String A_DELETED_BRAND = "aDeletedBrand";
+	private static final String A_DELETED_MODEL = "aDeletedModel";
+	private static final BigDecimal A_DELETED_DAILY_RATE = BigDecimal.valueOf(12.3);
+
 	private CarRepositoryJpa carRepository;
+	private Car car, anotherCar;
 
 	@BeforeEach
 	void setUp() {
 		carRepository = new CarRepositoryJpa(entityManager);
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
 	}
 
 	@Nested
@@ -57,7 +63,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenThereIsOnlyOneActiveCarReturnAListWithASingleElement() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 			persistDeletedCar();
 
 			List<Car> result = carRepository.findAllActive();
@@ -67,13 +73,13 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindAllActiveWhenThereAreMultipleActiveCarsReturnAListWithAllActiveElements() {
-			Car firstCar = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-			Car secondCar = persistCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+			persistCar(car);
+			persistCar(anotherCar);
 			persistDeletedCar();
 
 			List<Car> result = carRepository.findAllActive();
 
-			assertThat(result).hasSize(2).containsExactlyInAnyOrder(firstCar, secondCar);
+			assertThat(result).hasSize(2).containsExactlyInAnyOrder(car, anotherCar);
 		}
 
 	}
@@ -90,18 +96,16 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByCarPlateWhenCarIsDeletedReturnsEmptyOptional() {
-			Car deletedCar = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			deletedCar.setDeleted(true);
-			persistCar(deletedCar);
+			persistDeletedCar();
 
-			Optional<Car> result = carRepository.findActiveByCarPlate(A_CAR_PLATE);
+			Optional<Car> result = carRepository.findActiveByCarPlate(A_DELETED_CAR_PLATE);
 
 			assertThat(result).isEmpty();
 		}
 
 		@Test
 		void testFindActiveByCarPlateWhenCarIsActiveReturnsOptionalWithCar() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 
 			Optional<Car> result = carRepository.findActiveByCarPlate(A_CAR_PLATE);
 
@@ -110,7 +114,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByCarPlateWhenCarDoesNotExistReturnsEmpty() {
-			persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 
 			Optional<Car> result = carRepository.findActiveByCarPlate(ANOTHER_CAR_PLATE);
 
@@ -123,7 +127,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 			deletedCar.setDeleted(true);
 			persistCar(deletedCar);
 
-			Car activeCar = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			Car activeCar = persistCar(car);
 
 			Optional<Car> result = carRepository.findActiveByCarPlate(A_CAR_PLATE);
 
@@ -144,7 +148,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCarDoesNotExistReturnsEmptyOptional() {
-			persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 
 			Optional<Car> result = carRepository.findActiveById(Long.MAX_VALUE);
 
@@ -153,9 +157,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCarIsDeletedReturnsEmptyOptional() {
-			Car deletedCar = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-			deletedCar.setDeleted(true);
-			persistCar(deletedCar);
+			Car deletedCar = persistDeletedCar();
 
 			Optional<Car> result = carRepository.findActiveById(deletedCar.getId());
 
@@ -164,7 +166,7 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testFindActiveByIdWhenCarIsActiveReturnsOptionalWithCar() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 
 			Optional<Car> result = carRepository.findActiveById(car.getId());
 
@@ -178,32 +180,33 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 		@Test
 		void testSaveWhenCarIsNewPersistsItAndReturnsItWithGeneratedId() {
-			Car car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
-
 			entityManager.getTransaction().begin();
 			Car result = carRepository.save(car);
 			entityManager.getTransaction().commit();
 
 			assertThat(result.getId()).isNotNull();
 			assertThat(result.getCarPlate()).isEqualTo(A_CAR_PLATE);
+			assertThat(result.getBrand()).isEqualTo(A_BRAND);
+			assertThat(result.getModel()).isEqualTo(A_MODEL);
+			assertThat(result.getDailyRate()).isEqualTo(A_DAILY_RATE);
 		}
 
 		@Test
 		void testSaveWhenCarIsNewCanBeRetrievedDirectlyFromDatabase() {
 			entityManager.getTransaction().begin();
-			Car car = carRepository.save(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			Car result = carRepository.save(car);
 			entityManager.getTransaction().commit();
 
 			entityManager.clear();
 
-			Car reloaded = entityManager.find(Car.class, car.getId());
+			Car reloaded = entityManager.find(Car.class, result.getId());
 
-			assertThat(reloaded).isEqualTo(car);
+			assertThat(reloaded).isEqualTo(result);
 		}
 
 		@Test
 		void testSaveWhenCarAlreadyExistsUpdatesItsFieldsInDatabase() {
-			Car car = persistCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+			persistCar(car);
 			car.setDeleted(true);
 
 			entityManager.getTransaction().begin();
@@ -220,11 +223,11 @@ class CarRepositoryJpaTest extends BasePostgresTest {
 
 	}
 
-	private void persistDeletedCar() {
-		Car deletedCar = new Car("aDeletedPlate", "aDeletedBrand", "aDeletedModel", BigDecimal.valueOf(12.3));
+	private Car persistDeletedCar() {
+		Car deletedCar = new Car(A_DELETED_CAR_PLATE, A_DELETED_BRAND, A_DELETED_MODEL, A_DELETED_DAILY_RATE);
 		deletedCar.setDeleted(true);
 
-		persistCar(deletedCar);
+		return persistCar(deletedCar);
 	}
 
 	private Car persistCar(Car car) {

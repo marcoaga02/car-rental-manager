@@ -14,7 +14,7 @@ public final class TableAssertionUtils {
 		if (tableContents == null) {
 			return Collections.emptyList();
 		}
-		
+
 		return Arrays.stream(tableContents).map(Arrays::asList).collect(Collectors.toList());
 	}
 

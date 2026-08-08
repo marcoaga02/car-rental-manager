@@ -62,6 +62,8 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 	private static final LocalDate TODAY = LocalDate.parse("2026-05-10");
 	private final Clock fixedClock = Clock.fixed(TODAY.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
 
+	private Car car, anotherCar;
+
 	private CarPanel carPanel;
 	private CarController carController;
 	private FrameFixture window;
@@ -80,14 +82,17 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 		});
 
 		window = showInFrame(robot(), carPanel);
+
+		car = new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE);
+		anotherCar = new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE);
 	}
 
 	@Test
 	@GUITest
 	public void testOnActivateShowsOnlyActiveCarsFromDatabase() {
 		persistDeletedCar();
-		persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
 
 		GuiActionRunner.execute(() -> carPanel.onActivate());
 
@@ -99,7 +104,7 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAddCarPersistsInDatabaseAndKeepsPreviouslyExistingCars() {
-		persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(anotherCar);
 		GuiActionRunner.execute(() -> carPanel.onActivate());
 
 		window.textBox(CAR_PLATE_TEXT_FIELD).enterText(A_CAR_PLATE);
@@ -110,8 +115,8 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 		window.button(JButtonMatcher.withText(ADD_CAR_BTN)).click();
 
 		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactlyInAnyOrder(
-				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()),
-				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()));
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()),
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 
@@ -131,7 +136,7 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testAddCarWithDuplicatePlateShowsError() {
-		persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		persistCar(car);
 
 		GuiActionRunner.execute(() -> carPanel.onActivate());
 
@@ -148,12 +153,15 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeleteCarSoftDeletesInDatabaseAndRemovesFromTable() {
-		Car car = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
-		persistActiveCar(new Car(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE));
+		persistCar(car);
+		persistCar(anotherCar);
 
 		GuiActionRunner.execute(() -> carPanel.onActivate());
 
-		window.table(CAR_TABLE).selectRows(0);
+		CarTableModel tableModel = carPanel.getCarTableModel();
+		int rowToDelete = IntStream.range(0, tableModel.getRowCount())
+				.filter(row -> tableModel.getCarAt(row).getCarPlate().equals(A_CAR_PLATE)).findFirst().orElseThrow();
+		window.table(CAR_TABLE).selectRows(rowToDelete);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
 		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactly(
@@ -166,7 +174,7 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 	@Test
 	@GUITest
 	public void testDeleteCarWithActiveRentalShowsErrorAndCarStaysActive() {
-		Car car = persistActiveCar(new Car(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE));
+		persistCar(car);
 		Customer customer = persistCustomer(new Customer(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME));
 		persistRental(new Rental(car, customer, TODAY, A_NUMBER_OF_DAYS));
 
@@ -182,17 +190,13 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 		assertThat(persisted.getDeleted()).isFalse();
 	}
 
-	private Car persistActiveCar(Car car) {
-		return persistCar(car, false);
-	}
-
 	private Car persistDeletedCar() {
 		Car deletedCar = new Car("aDeletedPlate", "aBrand", "aModel", BigDecimal.valueOf(10.0));
-		return persistCar(deletedCar, true);
+		deletedCar.setDeleted(true);
+		return persistCar(deletedCar);
 	}
 
-	private Car persistCar(Car car, boolean deleted) {
-		car.setDeleted(deleted);
+	private Car persistCar(Car car) {
 		entityManager.getTransaction().begin();
 		entityManager.persist(car);
 		entityManager.getTransaction().commit();
