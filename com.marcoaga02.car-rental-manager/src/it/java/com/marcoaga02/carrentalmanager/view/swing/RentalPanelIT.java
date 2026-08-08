@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 
@@ -8,6 +9,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.swing.annotation.GUITest;
@@ -128,10 +130,9 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 
 		GuiActionRunner.execute(() -> rentalPanel.onActivate());
 
-		String[][] contents = window.table(RENTAL_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { A_CUSTOMER_FULLNAME, A_RENTED_CAR_DESCRIPTION, A_FORMATTED_START_DATE,
-						A_FORMATTED_END_DATE, A_NUMBER_OF_DAYS.toString(), A_RENTED_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents()))
+				.containsExactly(List.of(A_CUSTOMER_FULLNAME, A_RENTED_CAR_DESCRIPTION, A_FORMATTED_START_DATE,
+						A_FORMATTED_END_DATE, A_NUMBER_OF_DAYS.toString(), A_RENTED_TOTAL_AMOUNT.toString()));
 
 		String[] carComboContents = window.comboBox(CAR_COMBO_BOX).contents();
 		assertThat(carComboContents).containsExactlyInAnyOrder(A_CAR_DESCRIPTION, ANOTHER_CAR_DESCRIPTION);
@@ -224,10 +225,9 @@ public class RentalPanelIT extends BaseSwingPostgresTest {
 		window.table(RENTAL_TABLE).selectRows(rowToDelete);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		String[][] contents = window.table(RENTAL_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION,
-				ANOTHER_FORMATTED_START_DATE, ANOTHER_FORMATTED_END_DATE, ANOTHER_NUMBER_OF_DAYS.toString(),
-				ANOTHER_TOTAL_AMOUNT.toString() } });
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents())).containsExactly(List.of(ANOTHER_CUSTOMER_FULLNAME,
+				ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE, ANOTHER_FORMATTED_END_DATE,
+				ANOTHER_NUMBER_OF_DAYS.toString(), ANOTHER_TOTAL_AMOUNT.toString()));
 
 		Rental persisted = entityManager.find(Rental.class, rental.getId());
 		assertThat(persisted).isNull();

@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 
@@ -7,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.swing.annotation.GUITest;
@@ -90,9 +92,9 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 
 		GuiActionRunner.execute(() -> customerPanel.onActivate());
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME },
-				{ ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 	}
 
 	@Test
@@ -107,10 +109,9 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 
 		window.button(JButtonMatcher.withText(ADD_CUSTOMER_BTN)).click();
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME },
-						{ A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		window.label(ERROR_LABEL).requireText(" ");
 
@@ -154,9 +155,8 @@ public class CustomerPanelIT extends BaseSwingPostgresTest {
 		window.table(CUSTOMER_TABLE).selectRows(0);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		String[][] contents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(contents)
-				.isDeepEqualTo(new String[][] { { ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(rowsOf(window.table(CUSTOMER_TABLE).contents()))
+				.containsExactly(List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		Customer persisted = entityManager.find(Customer.class, customer.getId());
 		assertThat(persisted.getDeleted()).isTrue();

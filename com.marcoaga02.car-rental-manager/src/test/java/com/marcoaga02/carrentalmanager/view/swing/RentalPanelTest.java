@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -147,13 +148,12 @@ public class RentalPanelTest extends AssertJSwingJUnitTestCase {
 			rentalPanel.showAllRentals(List.of(rental1, rental2));
 		});
 
-		String[][] tableContents = window.table(RENTAL_TABLE).contents();
-		assertThat(tableContents).isDeepEqualTo(new String[][] {
-				{ A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_FORMATTED_START_DATE, A_FORMATTED_END_DATE,
-						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString() },
-				{ ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE,
+		assertThat(rowsOf(window.table(RENTAL_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_CUSTOMER_FULLNAME, A_CAR_DESCRIPTION, A_FORMATTED_START_DATE, A_FORMATTED_END_DATE,
+						A_NUMBER_OF_DAYS.toString(), A_TOTAL_AMOUNT.toString()),
+				List.of(ANOTHER_CUSTOMER_FULLNAME, ANOTHER_CAR_DESCRIPTION, ANOTHER_FORMATTED_START_DATE,
 						ANOTHER_FORMATTED_END_DATE, ANOTHER_NUMBER_OF_DAYS.toString(),
-						ANOTHER_TOTAL_AMOUNT.toString() } });
+						ANOTHER_TOTAL_AMOUNT.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}

@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.marcoaga02.carrentalmanager.controller.CustomerController;
+import com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils;
 import com.marcoaga02.carrentalmanager.viewmodel.CustomerViewModel;
 
 @RunWith(GUITestRunner.class)
@@ -106,9 +107,9 @@ public class CustomerPanelTest extends AssertJSwingJUnitTestCase {
 			customerPanel.showAllCustomers(List.of(customer1, customer2));
 		});
 
-		String[][] tableContents = window.table(CUSTOMER_TABLE).contents();
-		assertThat(tableContents).isDeepEqualTo(new String[][] { { A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME },
-				{ ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME } });
+		assertThat(TableAssertionUtils.rowsOf(window.table(CUSTOMER_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_TAX_ID_CODE, A_FIRSTNAME, A_LASTNAME),
+				List.of(ANOTHER_TAX_ID_CODE, ANOTHER_FIRSTNAME, ANOTHER_LASTNAME));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}

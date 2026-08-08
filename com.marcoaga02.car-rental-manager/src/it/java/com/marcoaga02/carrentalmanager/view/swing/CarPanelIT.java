@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 
@@ -7,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.swing.annotation.GUITest;
@@ -89,9 +91,9 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 
 		GuiActionRunner.execute(() -> carPanel.onActivate());
 
-		String[][] contents = window.table(CAR_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(new String[][] { { A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString() },
-				{ ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()),
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 	}
 
 	@Test
@@ -107,10 +109,9 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 
 		window.button(JButtonMatcher.withText(ADD_CAR_BTN)).click();
 
-		String[][] contents = window.table(CAR_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(
-				new String[][] { { ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() },
-						{ A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactlyInAnyOrder(
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()),
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 
@@ -155,9 +156,8 @@ public class CarPanelIT extends BaseSwingPostgresTest {
 		window.table(CAR_TABLE).selectRows(0);
 		window.button(JButtonMatcher.withText(DELETE_SELECTED_BTN)).click();
 
-		String[][] contents = window.table(CAR_TABLE).contents();
-		assertThat(contents).isDeepEqualTo(
-				new String[][] { { ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE).contents())).containsExactly(
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 
 		Car persisted = entityManager.find(Car.class, car.getId());
 		assertThat(persisted.getDeleted()).isTrue();

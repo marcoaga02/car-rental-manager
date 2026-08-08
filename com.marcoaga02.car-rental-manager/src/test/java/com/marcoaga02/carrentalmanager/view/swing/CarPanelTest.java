@@ -1,5 +1,6 @@
 package com.marcoaga02.carrentalmanager.view.swing;
 
+import static com.marcoaga02.carrentalmanager.testutils.TableAssertionUtils.rowsOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.swing.fixture.Containers.showInFrame;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -113,10 +114,10 @@ public class CarPanelTest extends AssertJSwingJUnitTestCase {
 			carPanel.showAllCars(List.of(car1, car2));
 		});
 
-		String[][] tableContents = window.table(CAR_TABLE).contents();
-		assertThat(tableContents)
-				.isDeepEqualTo(new String[][] { { A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString() },
-						{ ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString() } });
+		assertThat(rowsOf(window.table(CAR_TABLE)
+				.contents())).containsExactlyInAnyOrder(
+				List.of(A_CAR_PLATE, A_BRAND, A_MODEL, A_DAILY_RATE.toString()),
+				List.of(ANOTHER_CAR_PLATE, ANOTHER_BRAND, ANOTHER_MODEL, ANOTHER_DAILY_RATE.toString()));
 
 		window.label(ERROR_LABEL).requireText(" ");
 	}
